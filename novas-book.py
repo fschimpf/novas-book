@@ -4,6 +4,8 @@ from leapseconds import dTAI_UTC_from_utc           # from https://gist.github.c
 from novas import compat as novas
 from novas.compat import eph_manager
 
+import ospd
+
 from jinja2 import Environment, PackageLoader
 jinja = Environment(
     block_start_string = '((*',                     # Set delimiters to LaTex-conform strings
@@ -48,8 +50,16 @@ def calculate_ephemerides_planets_day (day, month, year):
     return
 
 calculate_ephemerides_planets_day (15, 3, 2021)
-template = jinja.get_template('table_template.jinja')
 
-outfile = open('book.tex', 'w')
+# Write the results into template-file
+template = jinja.get_template('table_style_Nautisches_Jahrbuch.tex.jinja')
+# FIX: Use correct directory for output...
+dir_fd = os.open('./output', os.O_RDONLY)
+def opener(path, flags):
+    return os.open(path, flags, dir_fd=dir_fd)
+outfile = open('book.tex', 'w', opener=opener)
 print(template.render(year='2021', month='Mai', day='13', dayofweek='Montag'),file=outfile)
 outfile.close()
+
+# FIX: run pdflatex
+#subprocess.run("pdflatex", "-synctex=1 -interaction=nonstopmode ./output/book.tex")
