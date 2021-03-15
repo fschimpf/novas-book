@@ -4,8 +4,9 @@ from leapseconds import dTAI_UTC_from_utc           # from https://gist.github.c
 from novas import compat as novas
 from novas.compat import eph_manager
 
-jd_start, jd_end, number = eph_manager.ephem_open()
+from jinja2 import Template
 
+jd_start, jd_end, number = eph_manager.ephem_open()
 
 def calculate_ephemerides_planets_day (day, month, year):
     #(day, month, year) = (15, 3, 2021)
