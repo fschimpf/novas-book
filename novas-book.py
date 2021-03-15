@@ -5,7 +5,7 @@ from novas import compat as novas
 from novas.compat import eph_manager
 jd_start, jd_end, number = eph_manager.ephem_open()
 
-(day, month, year) = (12, 3, 2005)
+(day, month, year) = (15, 3, 2021)
 (planet_no, planet) = (4, 'Mars')
 
 # Get number of leapseconds between TAI and UTC. This is used for calculating
