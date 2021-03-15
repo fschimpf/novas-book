@@ -4,7 +4,16 @@ from leapseconds import dTAI_UTC_from_utc           # from https://gist.github.c
 from novas import compat as novas
 from novas.compat import eph_manager
 
-from jinja2 import Template
+from jinja2 import Environment, PackageLoader
+jinja = Environment(
+    block_start_string = '((*',                     # Set delimiters to LaTex-conform strings
+    block_end_string= '*))',
+    variable_start_string= '(((',
+    variable_end_string= ')))',
+    comment_start_string= '((=',
+    comment_end_string= '=))',
+    loader=PackageLoader('novas-book', 'templates')
+)
 
 jd_start, jd_end, number = eph_manager.ephem_open()
 
@@ -39,3 +48,8 @@ def calculate_ephemerides_planets_day (day, month, year):
     return
 
 calculate_ephemerides_planets_day (15, 3, 2021)
+template = jinja.get_template('table_template.jinja')
+
+outfile = open('book.tex', 'w')
+print(template.render(year='2021', month='Mai', day='13', dayofweek='Montag'),file=outfile)
+outfile.close()
