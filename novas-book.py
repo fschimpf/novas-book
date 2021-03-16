@@ -4,7 +4,7 @@ from leapseconds import dTAI_UTC_from_utc           # from https://gist.github.c
 from novas import compat as novas
 from novas.compat import eph_manager
 
-import ospd
+import os
 
 from jinja2 import Environment, PackageLoader
 jinja = Environment(
@@ -20,40 +20,56 @@ jinja = Environment(
 jd_start, jd_end, number = eph_manager.ephem_open()
 
 def calculate_ephemerides_planets_day (day, month, year):
-    #(day, month, year) = (15, 3, 2021)
-    (planet_no, planet) = (4, 'Mars')
+    sky_object_names = [
+        (10, 'Sonne'),
+        (11, 'Mond'),
+        (2, 'Venus'),
+        (4, 'Mars'),
+        (5, 'Jupiter'),
+        (6, 'Saturn')
+    ]
+    sky_objects = []
+    for i in sky_object_names:
+        (planet_no, planet) = i
+        #print (planet_no, planet)
+        sky_objects.append(novas.make_object(0, planet_no, planet, None))
 
     # Get number of leapseconds between TAI and UTC. This is used for calculating
     # TT from UT1. TT = leapseconds + 32.184s + UT1. http://www.stjarnhimlen.se/comp/time.html
     leapseconds = dTAI_UTC_from_utc(datetime(year, month, day)).seconds
-    #print leapseconds
     delta_TT_UT1 = (32.184 + leapseconds) / 3600.0
 
-    print()
-    print ('    %s %d.%d.%d' % (planet, day, month, year))
-    print ()
-    print ('UT1     Grt            Dek            Frühlp.')
-    print ('      °   min         °   min         °   min')
+    day_results = []
+    for time_ut1 in range(24): # iterate over 24h of UT1 (=lines in final table for one day)
+        planet_results_per_UT1 = []
 
-    for time_ut1 in range(24):
+        # calculate Julian date of TT and UT1 
         time_tt = delta_TT_UT1 + time_ut1
         jd_tt = novas.julian_date(year, month, day, time_tt)
         jd_ut1 = novas.julian_date(year, month, day, time_ut1)
+
+        # calculate Greenwich hour angle (GHA) for spring point
         theta = novas.sidereal_time(jd_ut1,0,delta_TT_UT1,1) * 360 / 24
-        mars = novas.make_object(0, planet_no, planet, None)
-        ra, dec, dis = novas.app_planet(jd_tt, mars)
-        ra = ra * 360 / 24
-        grt = theta - ra
-        if grt < 0:
-            grt = grt + 360.0
-        print ('%02d   %03d  %04.1f      %04d  %04.1f       %03d  %04.1f' % (time_ut1, grt, abs(grt) % 1. * 60, dec, abs(dec) % 1. * 60., theta, abs(theta) % 1. * 60.))
-    return
+        planet_results_per_UT1.append((theta))
+
+        # calculate Greenwich hour angle and declination for planets (sun and moon are considered planets)
+        for planet in sky_objects:
+            ra, dec, dis = novas.app_planet(jd_tt, planet)
+            ra = ra * 360 / 24  # go from hour angle to degrees
+            grt = theta - ra    # calculate hour angle from GHA and planet's right ascension
+            if grt < 0:
+                grt = grt + 360.0
+            planet_results_per_UT1.append((grt, dec))
+        
+        day_results.append(planet_results_per_UT1)
+
+    print (day_results)
 
 calculate_ephemerides_planets_day (15, 3, 2021)
 
 # Write the results into template-file
 template = jinja.get_template('table_style_Nautisches_Jahrbuch.tex.jinja')
-# FIX: Use correct directory for output...
+
 dir_fd = os.open('./output', os.O_RDONLY)
 def opener(path, flags):
     return os.open(path, flags, dir_fd=dir_fd)

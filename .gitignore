@@ -1,0 +1,9 @@
+book.aux
+book.log
+book.pdf
+leapseconds.pyc
+__pycache__/leapseconds.cpython-36.pyc
+__pycache__/novas-book.cpython-36.pyc
+output/book.tex
+templates/table_template.pdf
+templates/table_style_Nautisches_Jahrbuch.tex
