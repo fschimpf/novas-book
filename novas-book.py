@@ -18,6 +18,39 @@ jinja = Environment(
     loader=FileSystemLoader('templates')
 )
 
+# convert float to degrees and minutes, 'N' or 'S' instead of sign
+def decimal2dm_NS (decimal_angle):
+    if abs(decimal_angle) > 90:
+        raise NameError('Invalid declination angle')
+
+    # calculate minutes from fraction part
+    min = round(abs(decimal_angle) % 1. * 60, 1)
+    # add N or S instead of + or -
+    if decimal_angle >= 0:
+        min = '{} N'.format(min)
+    else:
+        min = '{} S'.format(min)
+    
+    # convert decimal part to string and remove sign and fraction part. (Important not to round, minutes are separeted!)
+    deg = int(abs(decimal_angle))
+    deg = '{:02.0F}'.format(deg)
+    
+    return (deg, min)
+
+#convert float to degrees and minuts, full circle
+def decimal2dm_360 (decimal_angle):
+    if decimal_angle < 0:
+        raise NameError('Invalid sign for full-circle-angle')
+    
+    # calculate minutes from fraction part
+    min = round(abs(decimal_angle) % 1. * 60, 1)
+  
+    # convert decimal part to string and remove fraction part. (Important not to round, minutes are separeted!)
+    deg = int(abs(decimal_angle))
+    deg = '{:03.0F}'.format(deg)
+    
+    return (deg, min)
+
 def calculate_ephemerides_planets_day (day, month, year):
     sky_object_names = [
         (10, 'Sonne'),
@@ -81,9 +114,11 @@ def opener(path, flags):
     return os.open(path, flags, dir_fd=dir_fd)
 outfile = open('book.tex', 'w', opener=opener)
 ut1 = range(24)
-print (ut1)
 print(template.render(year='2021', month='Mai', day='13', dayofweek='Montag', d=day_results, ut1=ut1),file=outfile)
 outfile.close()
+
+print (decimal2dm_NS (3.500000007))
+print (decimal2dm_360 (3.89888))
 
 #print (day_results[0][0])
 
