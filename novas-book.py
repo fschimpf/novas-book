@@ -6,7 +6,7 @@ from novas.compat import eph_manager
 
 import os
 
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, FileSystemLoader
 jinja = Environment(
     block_start_string = '((*',                     # Set delimiters to LaTex-conform strings
     block_end_string= '*))',
@@ -14,7 +14,7 @@ jinja = Environment(
     variable_end_string= ')))',
     comment_start_string= '((=',
     comment_end_string= '=))',
-    loader=PackageLoader('novas-book', 'templates')
+    loader=FileSystemLoader('templates')
 )
 
 jd_start, jd_end, number = eph_manager.ephem_open()
@@ -60,12 +60,15 @@ def calculate_ephemerides_planets_day (day, month, year):
             if grt < 0:
                 grt = grt + 360.0
             planet_results_per_UT1.append((grt, dec))
+            #print (planet_results_per_UT1)
         
         day_results.append(planet_results_per_UT1)
 
-    print (day_results)
+    print ('ping')
+    #print (day_results[0][1])
+    return day_results
 
-calculate_ephemerides_planets_day (15, 3, 2021)
+day_results = calculate_ephemerides_planets_day (15, 3, 2021)
 
 # Write the results into template-file
 template = jinja.get_template('table_style_Nautisches_Jahrbuch.tex.jinja')
@@ -74,8 +77,12 @@ dir_fd = os.open('./output', os.O_RDONLY)
 def opener(path, flags):
     return os.open(path, flags, dir_fd=dir_fd)
 outfile = open('book.tex', 'w', opener=opener)
-print(template.render(year='2021', month='Mai', day='13', dayofweek='Montag'),file=outfile)
+print(template.render(year='2021', month='Mai', day='13', dayofweek='Montag', d=day_results),file=outfile)
 outfile.close()
+
+#print (day_results[0][1])
+
+
 
 # FIX: run pdflatex
 #subprocess.run("pdflatex", "-synctex=1 -interaction=nonstopmode ./output/book.tex")
