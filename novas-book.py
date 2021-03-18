@@ -14,10 +14,9 @@ jinja = Environment(
     variable_end_string= ')))',
     comment_start_string= '((=',
     comment_end_string= '=))',
+    line_statement_prefix= '###',
     loader=FileSystemLoader('templates')
 )
-
-jd_start, jd_end, number = eph_manager.ephem_open()
 
 def calculate_ephemerides_planets_day (day, month, year):
     sky_object_names = [
@@ -50,7 +49,8 @@ def calculate_ephemerides_planets_day (day, month, year):
 
         # calculate Greenwich hour angle (GHA) for spring point
         theta = novas.sidereal_time(jd_ut1,0,delta_TT_UT1,1) * 360 / 24
-        planet_results_per_UT1.append((theta))
+        #planet_results_per_UT1.append((theta))
+        planet_results_per_UT1.append(('123'))
 
         # calculate Greenwich hour angle and declination for planets (sun and moon are considered planets)
         for planet in sky_objects:
@@ -64,9 +64,12 @@ def calculate_ephemerides_planets_day (day, month, year):
         
         day_results.append(planet_results_per_UT1)
 
-    print ('ping')
     #print (day_results[0][1])
+    #Format for day_results: day_results[UT1 0..23][planet]
     return day_results
+
+
+jd_start, jd_end, number = eph_manager.ephem_open()
 
 day_results = calculate_ephemerides_planets_day (15, 3, 2021)
 
@@ -77,10 +80,12 @@ dir_fd = os.open('./output', os.O_RDONLY)
 def opener(path, flags):
     return os.open(path, flags, dir_fd=dir_fd)
 outfile = open('book.tex', 'w', opener=opener)
-print(template.render(year='2021', month='Mai', day='13', dayofweek='Montag', d=day_results),file=outfile)
+ut1 = range(24)
+print (ut1)
+print(template.render(year='2021', month='Mai', day='13', dayofweek='Montag', d=day_results, ut1=ut1),file=outfile)
 outfile.close()
 
-#print (day_results[0][1])
+#print (day_results[0][0])
 
 
 
