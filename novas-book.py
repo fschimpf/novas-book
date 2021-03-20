@@ -22,6 +22,7 @@ jinja = Environment(
 )
 
 weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+months = ['','Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 
 # convert float to degrees and minutes, 'N' or 'S' instead of sign
 def decimal2dm_NS (decimal_angle):
@@ -136,7 +137,7 @@ for dt in rrule(DAILY, dtstart=startdate, until=enddate):
     day_results = calculate_ephemerides_planets_day (year, month, day)
 
     #render day's results into tex-file using the inner_template
-    print(inner_template.render(year=year, month=month, day=day, dayofweek=weekday, d=day_results, page_is_even=page_is_even, ut1=ut1),file=outfile)
+    print(inner_template.render(year=year, month=months[month], day=day, dayofweek=weekday, d=day_results, page_is_even=page_is_even, ut1=ut1),file=outfile)
  
     if page_is_even == 1:
         page_is_even = 0
