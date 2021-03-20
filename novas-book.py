@@ -21,6 +21,8 @@ jinja = Environment(
     loader=FileSystemLoader('templates')
 )
 
+weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+
 # convert float to degrees and minutes, 'N' or 'S' instead of sign
 def decimal2dm_NS (decimal_angle):
     if abs(decimal_angle) > 90:
@@ -55,7 +57,7 @@ def decimal2dm_360 (decimal_angle):
     
     return (deg, min)
 
-def calculate_ephemerides_planets_day (day, month, year):
+def calculate_ephemerides_planets_day (year, month, day):
 
     # define novas objects List of (novas_object, planet_name)
     sky_objects = []
@@ -101,11 +103,13 @@ def calculate_ephemerides_planets_day (day, month, year):
 # Open ephemerides database
 jd_start, jd_end, number = eph_manager.ephem_open()
 
-# Calculate ephemerides for one selected day
-day_results = calculate_ephemerides_planets_day (12, 3, 2005)
+year = 2005
+startdate = date(year, 1, 1)
+enddate = date(year, 12, 31)
 
-# Open Jinja-template-file for generating LaTex-document
-template = jinja.get_template('table_style_Nautisches_Jahrbuch.tex.jinja')
+# Open Jinja-template-files for generating LaTex-document
+outer_template = jinja.get_template('table_style_Nautisches_Jahrbuch.tex.jinja')
+inner_template = jinja.get_template('table_style_Nautisches_Jahrbuch_day.tex.jinja')
 
 # Open output file (LaTex)
 dir_fd = os.open('./output', os.O_RDONLY)
@@ -113,27 +117,38 @@ def opener(path, flags):
     return os.open(path, flags, dir_fd=dir_fd)
 outfile = open('book.tex', 'w', opener=opener)
 
+# Render the template and write to output-file
+print(outer_template.render(year=year),file=outfile)
+
 # ut1 is used for iterating through list with results from within the Jinja-template 
 ut1 = range(24)
 
-# Render the template and write to output-file
 page_is_even = 1
-print(template.render(page_is_even=page_is_even, year='2005', month='März', day='12', dayofweek='Samstag', d=day_results, ut1=ut1),file=outfile)
+for dt in rrule(DAILY, dtstart=startdate, until=enddate):
+    year = int(dt.strftime('%Y'))
+    month = int(dt.strftime('%m'))
+    day = int(dt.strftime('%d'))
+    
+    weekday = weekdays[dt.weekday()]
+    print ('{}, {}.{}.{}'.format(weekday, day, month, year))
+
+    # Calculate ephemerides for one selected day
+    day_results = calculate_ephemerides_planets_day (year, month, day)
+
+    #render day's results into tex-file using the inner_template
+    print(inner_template.render(year=year, month=month, day=day, dayofweek=weekday, d=day_results, page_is_even=page_is_even, ut1=ut1),file=outfile)
+ 
+    if page_is_even == 1:
+        page_is_even = 0
+    else:
+        page_is_even = 1
+
+print('\end{document}', file=outfile)
 
 outfile.close()
 
 # Print something to shell 
-a = date(2005, 1, 1)
-b = date(2005, 12, 31)
-
-
-weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
-for dt in rrule(DAILY, dtstart=a, until=b):
-    year = dt.strftime('%Y')
-    month = dt.strftime('%m')
-    day = dt.strftime('%d')
-    weekday = weekdays[dt.weekday()]
-    print ('{}, {}.{}.{}'.format(weekday, day, month, year))
+print ('done')
 
 # FIX: run pdflatex
 #subprocess.run("pdflatex", "-synctex=1 -interaction=nonstopmode ./output/book.tex")
