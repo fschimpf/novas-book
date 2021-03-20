@@ -110,11 +110,12 @@ def opener(path, flags):
     return os.open(path, flags, dir_fd=dir_fd)
 outfile = open('book.tex', 'w', opener=opener)
 
-# ut1 is used for iterating through list with results from withing the Jinja-template 
+# ut1 is used for iterating through list with results from within the Jinja-template 
 ut1 = range(24)
 
 # Render the template and write to output-file
-print(template.render(year='2005', month='März', day='12', dayofweek='Samstag', d=day_results, ut1=ut1),file=outfile)
+page_is_even = 0
+print(template.render(page_is_even=page_is_even, year='2005', month='März', day='12', dayofweek='Samstag', d=day_results, ut1=ut1),file=outfile)
 
 outfile.close()
 
