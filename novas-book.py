@@ -6,6 +6,9 @@ from novas.compat import eph_manager
 
 import os
 
+from datetime import date
+from dateutil.rrule import rrule, DAILY
+
 from jinja2 import Environment, FileSystemLoader
 jinja = Environment(
     block_start_string = '((*',                     # Set delimiters to LaTex-conform strings
@@ -114,15 +117,23 @@ outfile = open('book.tex', 'w', opener=opener)
 ut1 = range(24)
 
 # Render the template and write to output-file
-page_is_even = 0
+page_is_even = 1
 print(template.render(page_is_even=page_is_even, year='2005', month='März', day='12', dayofweek='Samstag', d=day_results, ut1=ut1),file=outfile)
 
 outfile.close()
 
 # Print something to shell 
-for time_ut1 in range(24):
-    print (day_results[time_ut1])
-    print ()
+a = date(2005, 1, 1)
+b = date(2005, 12, 31)
+
+
+weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+for dt in rrule(DAILY, dtstart=a, until=b):
+    year = dt.strftime('%Y')
+    month = dt.strftime('%m')
+    day = dt.strftime('%d')
+    weekday = weekdays[dt.weekday()]
+    print ('{}, {}.{}.{}'.format(weekday, day, month, year))
 
 # FIX: run pdflatex
 #subprocess.run("pdflatex", "-synctex=1 -interaction=nonstopmode ./output/book.tex")
