@@ -83,7 +83,7 @@ def calculate_ephemerides_planets_day (day, month, year):
         # calculate Greenwich hour angle (GHA) for spring point
         theta = novas.sidereal_time(jd_ut1,0,delta_TT_UT1,1) * 360 / 24
         #planet_results_per_UT1.append((theta))
-        planet_results_per_UT1.append(('123'))
+        planet_results_per_UT1.append((decimal2dm_360(theta)))
 
         # calculate Greenwich hour angle and declination for planets (sun and moon are considered planets)
         for planet in sky_objects:
@@ -92,7 +92,7 @@ def calculate_ephemerides_planets_day (day, month, year):
             grt = theta - ra    # calculate hour angle from GHA and planet's right ascension
             if grt < 0:
                 grt = grt + 360.0
-            planet_results_per_UT1.append((grt, dec))
+            planet_results_per_UT1.append((decimal2dm_360(grt), decimal2dm_NS(dec)))
             #print (planet_results_per_UT1)
         
         day_results.append(planet_results_per_UT1)
@@ -117,10 +117,8 @@ ut1 = range(24)
 print(template.render(year='2021', month='Mai', day='13', dayofweek='Montag', d=day_results, ut1=ut1),file=outfile)
 outfile.close()
 
-print (decimal2dm_NS (3.500000007))
-print (decimal2dm_360 (3.89888))
-
-#print (day_results[0][0])
+for time_ut1 in range(24):
+    print (day_results[time_ut1])
 
 
 
