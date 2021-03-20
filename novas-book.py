@@ -27,9 +27,9 @@ def decimal2dm_NS (decimal_angle):
     min = round(abs(decimal_angle) % 1. * 60, 1)
     # add N or S instead of + or -
     if decimal_angle >= 0:
-        min = '{} N'.format(min)
+        min = '{:04.1F} N'.format(min)
     else:
-        min = '{} S'.format(min)
+        min = '{:04.1F} S'.format(min)
     
     # convert decimal part to string and remove sign and fraction part. (Important not to round, minutes are separeted!)
     deg = int(abs(decimal_angle))
@@ -44,7 +44,8 @@ def decimal2dm_360 (decimal_angle):
     
     # calculate minutes from fraction part
     min = round(abs(decimal_angle) % 1. * 60, 1)
-  
+    min = '{:04.1F}'.format(min)
+
     # convert decimal part to string and remove fraction part. (Important not to round, minutes are separeted!)
     deg = int(abs(decimal_angle))
     deg = '{:03.0F}'.format(deg)
@@ -69,7 +70,6 @@ def calculate_ephemerides_planets_day (day, month, year):
 
     day_results = []
     for time_ut1 in range(24): # iterate over 24h of UT1 (=lines in final table for one day)
-        #planet_results_per_UT1 = []
 
         # calculate Julian date of TT and UT1 
         time_tt = delta_TT_UT1 + time_ut1
@@ -78,7 +78,6 @@ def calculate_ephemerides_planets_day (day, month, year):
 
         # calculate Greenwich hour angle (GHA) for spring point
         theta = novas.sidereal_time(jd_ut1,0,delta_TT_UT1,1) * 360 / 24
-        #planet_results_per_UT1.append((theta))
         planet_results_per_UT1 = {'spr_p': decimal2dm_360(theta)}
 
         # calculate Greenwich hour angle and declination for planets (sun and moon are considered planets)
@@ -89,35 +88,40 @@ def calculate_ephemerides_planets_day (day, month, year):
             if grt < 0:
                 grt = grt + 360.0
             planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec))
-            #print (planet_results_per_UT1)
         
         day_results.append(planet_results_per_UT1)
 
-    #print (day_results[0][1])
-    #Format for day_results: day_results[UT1 0..23][planet]
     return day_results
 
 
+# Start Main...
+# Open ephemerides database
 jd_start, jd_end, number = eph_manager.ephem_open()
 
-day_results = calculate_ephemerides_planets_day (15, 3, 2021)
+# Calculate ephemerides for one selected day
+day_results = calculate_ephemerides_planets_day (12, 3, 2005)
 
-# Write the results into template-file
+# Open Jinja-template-file for generating LaTex-document
 template = jinja.get_template('table_style_Nautisches_Jahrbuch.tex.jinja')
 
+# Open output file (LaTex)
 dir_fd = os.open('./output', os.O_RDONLY)
 def opener(path, flags):
     return os.open(path, flags, dir_fd=dir_fd)
 outfile = open('book.tex', 'w', opener=opener)
+
+# ut1 is used for iterating through list with results from withing the Jinja-template 
 ut1 = range(24)
-print(template.render(year='2021', month='Mai', day='13', dayofweek='Montag', d=day_results, ut1=ut1),file=outfile)
+
+# Render the template and write to output-file
+print(template.render(year='2005', month='März', day='12', dayofweek='Samstag', d=day_results, ut1=ut1),file=outfile)
+
 outfile.close()
 
+# Print something to shell 
 for time_ut1 in range(24):
     print (day_results[time_ut1])
     print ()
-
-
 
 # FIX: run pdflatex
 #subprocess.run("pdflatex", "-synctex=1 -interaction=nonstopmode ./output/book.tex")
