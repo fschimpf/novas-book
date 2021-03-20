@@ -83,7 +83,7 @@ def calculate_ephemerides_planets_day (day, month, year):
         # calculate Greenwich hour angle and declination for planets (sun and moon are considered planets)
         for (planet, planet_name) in sky_objects:
             ra, dec, dis = novas.app_planet(jd_tt, planet)
-            ra = ra * 360 / 24  # go from hour angle to degrees
+            ra = ra * 360.0 / 24.0  # go from hour angle to degrees
             grt = theta - ra    # calculate hour angle from GHA and planet's right ascension
             if grt < 0:
                 grt = grt + 360.0
