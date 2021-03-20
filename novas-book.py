@@ -52,19 +52,15 @@ def decimal2dm_360 (decimal_angle):
     return (deg, min)
 
 def calculate_ephemerides_planets_day (day, month, year):
-    sky_object_names = [
-        (10, 'Sonne'),
-        (11, 'Mond'),
-        (2, 'Venus'),
-        (4, 'Mars'),
-        (5, 'Jupiter'),
-        (6, 'Saturn')
-    ]
+
+    # define novas objects List of (novas_object, planet_name)
     sky_objects = []
-    for i in sky_object_names:
-        (planet_no, planet) = i
-        #print (planet_no, planet)
-        sky_objects.append(novas.make_object(0, planet_no, planet, None))
+    sky_objects.append((novas.make_object(0, 10, 'sun', None), 'sun'))
+    sky_objects.append((novas.make_object(0, 11, 'moon', None), 'moon'))
+    sky_objects.append((novas.make_object(0, 2, 'venus', None), 'venus'))
+    sky_objects.append((novas.make_object(0, 4, 'mars', None), 'mars'))
+    sky_objects.append((novas.make_object(0, 5, 'jupiter', None), 'jupiter'))
+    sky_objects.append((novas.make_object(0, 6, 'saturn', None), 'saturn'))
 
     # Get number of leapseconds between TAI and UTC. This is used for calculating
     # TT from UT1. TT = leapseconds + 32.184s + UT1. http://www.stjarnhimlen.se/comp/time.html
@@ -73,7 +69,7 @@ def calculate_ephemerides_planets_day (day, month, year):
 
     day_results = []
     for time_ut1 in range(24): # iterate over 24h of UT1 (=lines in final table for one day)
-        planet_results_per_UT1 = []
+        #planet_results_per_UT1 = []
 
         # calculate Julian date of TT and UT1 
         time_tt = delta_TT_UT1 + time_ut1
@@ -83,16 +79,16 @@ def calculate_ephemerides_planets_day (day, month, year):
         # calculate Greenwich hour angle (GHA) for spring point
         theta = novas.sidereal_time(jd_ut1,0,delta_TT_UT1,1) * 360 / 24
         #planet_results_per_UT1.append((theta))
-        planet_results_per_UT1.append((decimal2dm_360(theta)))
+        planet_results_per_UT1 = {'spr_p': decimal2dm_360(theta)}
 
         # calculate Greenwich hour angle and declination for planets (sun and moon are considered planets)
-        for planet in sky_objects:
+        for (planet, planet_name) in sky_objects:
             ra, dec, dis = novas.app_planet(jd_tt, planet)
             ra = ra * 360 / 24  # go from hour angle to degrees
             grt = theta - ra    # calculate hour angle from GHA and planet's right ascension
             if grt < 0:
                 grt = grt + 360.0
-            planet_results_per_UT1.append((decimal2dm_360(grt), decimal2dm_NS(dec)))
+            planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec))
             #print (planet_results_per_UT1)
         
         day_results.append(planet_results_per_UT1)
@@ -119,6 +115,7 @@ outfile.close()
 
 for time_ut1 in range(24):
     print (day_results[time_ut1])
+    print ()
 
 
 
