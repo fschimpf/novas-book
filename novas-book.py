@@ -105,8 +105,8 @@ def calculate_ephemerides_planets_day (year, month, day):
 jd_start, jd_end, number = eph_manager.ephem_open()
 
 year = 2021
-startdate = date(year, 1, 1)
-enddate = date(year, 12, 31)
+startdate = date(year, 4, 1)
+enddate = date(year, 4, 30)
 
 # Open Jinja-template-files for generating LaTex-document
 document_template = jinja.get_template('NJ_mainDocument.tex.jinja')
