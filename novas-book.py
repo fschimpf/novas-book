@@ -21,7 +21,7 @@ jinja = Environment(
     loader=FileSystemLoader('templates')
 )
 
-weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Sonnabend', 'Sonntag']
 months = ['','Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 
 # convert float to degrees and minutes, 'N' or 'S' instead of sign
@@ -104,47 +104,47 @@ def calculate_ephemerides_planets_day (year, month, day):
 # Open ephemerides database
 jd_start, jd_end, number = eph_manager.ephem_open()
 
-year = 2005
+year = 2021
 startdate = date(year, 1, 1)
 enddate = date(year, 12, 31)
 
 # Open Jinja-template-files for generating LaTex-document
-outer_template = jinja.get_template('table_style_Nautisches_Jahrbuch.tex.jinja')
-inner_template = jinja.get_template('table_style_Nautisches_Jahrbuch_day.tex.jinja')
-
-# Open output file (LaTex)
-dir_fd = os.open('./output', os.O_RDONLY)
-def opener(path, flags):
-    return os.open(path, flags, dir_fd=dir_fd)
-outfile = open('book.tex', 'w', opener=opener)
-
-# Render the template and write to output-file
-print(outer_template.render(year=year),file=outfile)
+document_template = jinja.get_template('NJ_mainDocument.tex.jinja')
+table_eph_day_template = jinja.get_template('NJ_tableEphDay.tex.jinja')
 
 # ut1 is used for iterating through list with results from within the Jinja-template 
 ut1 = range(24)
 
+table=''
 page_is_even = 1
+
+# For every day in book...
 for dt in rrule(DAILY, dtstart=startdate, until=enddate):
     year = int(dt.strftime('%Y'))
     month = int(dt.strftime('%m'))
     day = int(dt.strftime('%d'))
-    
     weekday = weekdays[dt.weekday()]
     print ('{}, {}.{}.{}'.format(weekday, day, month, year))
 
-    # Calculate ephemerides for one selected day
+    # Calculate ephemerides for the selected day
     day_results = calculate_ephemerides_planets_day (year, month, day)
 
-    #render day's results into tex-file using the inner_template
-    print(inner_template.render(year=year, month=months[month], day=day, dayofweek=weekday, d=day_results, page_is_even=page_is_even, ut1=ut1),file=outfile)
- 
+    #render day's results into (long) string
+    table = table + table_eph_day_template.render(year=year, month=months[month], day=day, dayofweek=weekday, d=day_results, page_is_even=page_is_even, ut1=ut1)
+
     if page_is_even == 1:
         page_is_even = 0
     else:
         page_is_even = 1
 
-print('\end{document}', file=outfile)
+# Open output file (LaTex)
+dir_fd = os.open('./output', os.O_RDONLY)
+def opener(path, flags):
+    return os.open(path, flags, dir_fd=dir_fd)
+outfile = open('Ephemeriden_{}.tex'.format(year), 'w', opener=opener)
+
+# Render the main template and write to output-file
+print(document_template.render(year=year,table=table),file=outfile)
 
 outfile.close()
 
