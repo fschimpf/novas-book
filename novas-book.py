@@ -24,6 +24,17 @@ jinja = Environment(
 weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Sonnabend', 'Sonntag']
 months = ['','Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 
+# It is not easy to find data for all stars from the same catalog. Wikipedia entries use different catalogs for the entries. Most important
+# is that coordinats are referenced for Epoch J2000 and Equinox J2000.0 (ICRS). That is the case in Wikipedia. I used these entries. 
+# Entries for catalog and catalog number are therefore left empty.
+# tuple for stars: (no_in_Nautisches_Jahrbuch, novas-entry)
+stars = [
+    #                                                                                     motion       motion     prallax radial velocity
+    #                            Name            Cat  No       Ra[h]        delta[deg]   Ra[mas/a]   delta [mas/a] [mas]   [km/s]
+    (1, novas.make_cat_entry ("Alpha Andromedae",  "", 0,   0.139794411,   29.09043111,    135.68,    -162.95,      33.62, -10.6)),
+    (3, novas.make_cat_entry ("Alpha Phoenicis",   "", 0,   0.438069833,  -42.30598719,    233.05,    -356.3,       38.5,  +74.6))
+]
+
 # convert float to degrees and minutes, 'N' or 'S' instead of sign
 def decimal2dm_NS (decimal_angle):
     if abs(decimal_angle) > 90:
@@ -94,7 +105,15 @@ def calculate_ephemerides_planets_day (year, month, day):
             if grt < 0:
                 grt = grt + 360.0
             planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec))
-        
+
+        # calculate position of star
+        if time_ut1 < len(stars):
+            star_no, star = stars[time_ut1]
+            ra, dec = novas.app_star(jd_ut1, star)
+            ra = ra * 360.0 / 24.0  # go from hour angle to degrees
+            planet_results_per_UT1['stars'] = (star_no, decimal2dm_360(ra), decimal2dm_NS(dec))
+        else:
+            planet_results_per_UT1['stars'] = ('*', '*', '*', '*', '*')
         day_results.append(planet_results_per_UT1)
 
     return day_results
@@ -104,9 +123,9 @@ def calculate_ephemerides_planets_day (year, month, day):
 # Open ephemerides database
 jd_start, jd_end, number = eph_manager.ephem_open()
 
-year = 2021
-startdate = date(year, 4, 1)
-enddate = date(year, 4, 30)
+year = 2005
+startdate = date(year, 3, 18)
+enddate = date(year, 3, 21)
 
 # Open Jinja-template-files for generating LaTex-document
 document_template = jinja.get_template('NJ_mainDocument.tex.jinja')
