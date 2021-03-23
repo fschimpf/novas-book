@@ -29,10 +29,14 @@ months = ['','Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'Augu
 # Entries for catalog and catalog number are therefore left empty.
 # tuple for stars: (no_in_Nautisches_Jahrbuch, novas-entry)
 stars = [
-    #                                                                                     motion       motion     prallax radial velocity
-    #                            Name            Cat  No       Ra[h]        delta[deg]   Ra[mas/a]   delta [mas/a] [mas]   [km/s]
-    (1, novas.make_cat_entry ("Alpha Andromedae",  "", 0,   0.139794411,   29.09043111,    135.68,    -162.95,      33.62, -10.6)),
-    (3, novas.make_cat_entry ("Alpha Phoenicis",   "", 0,   0.438069833,  -42.30598719,    233.05,    -356.3,       38.5,  +74.6))
+    #                                                                                      motion       motion     prallax radial velocity
+    #                             Name            Cat  No       Ra[h]        delta[deg]   Ra[mas/a]   Dec [mas/a] [mas]      [km/s]
+    (1,  novas.make_cat_entry ("Alpha Andromedae",  "", 0,   0.139794411,  -29.09043111,   +135.68,    -162.95,      33.62,  -10.6)),
+    (3,  novas.make_cat_entry ("Alpha Phoenicis",   "", 0,   0.438069833,  -42.30598719,   +233.05,    -356.3,       38.5,   +74.6)),
+    (4,  novas.make_cat_entry ("Alpha Cassiopeiae", "", 0,   0.675122527,  +56.53733111,   +50.88,     -32.13,       14.29,  -4.31)),
+    (5,  novas.make_cat_entry ("Beta Ceti",         "", 0,   0.726491916,  -17.98660631,   +232.55,    +31.99,       33.86,  +12.9)),
+    (8,  novas.make_cat_entry ("Alpha Eridani",     "", 0,   1.628568189,  -57.23675281,   +87.00,     -38.24,       23.39,  +16.0)),
+    (11, novas.make_cat_entry ("Alpha Arietis",     "", 0,   2.119557139,  +23.46241756,   +188.55,    -148.08,      49.56,  +14.2))
 ]
 
 # convert float to degrees and minutes, 'N' or 'S' instead of sign
@@ -109,11 +113,11 @@ def calculate_ephemerides_planets_day (year, month, day):
         # calculate position of star
         if time_ut1 < len(stars):
             star_no, star = stars[time_ut1]
-            ra, dec = novas.app_star(jd_ut1, star)
-            ra = ra * 360.0 / 24.0  # go from hour angle to degrees
-            planet_results_per_UT1['stars'] = (star_no, decimal2dm_360(ra), decimal2dm_NS(dec))
+            ra, dec = novas.app_star(jd_tt, star) # FIX: Use fixed time in middle of 2-day-period instead. Star positions are valid for 2 days.
+            sha = 360.0 - (ra * 360.0 / 24.0)  # Calculate sidereal hour angle (SHA) from right ascension and convert from hours to degrees.
+            planet_results_per_UT1['stars'] = (star_no, decimal2dm_360(sha), decimal2dm_NS(dec))
         else:
-            planet_results_per_UT1['stars'] = ('*', '*', '*', '*', '*')
+            planet_results_per_UT1['stars'] = ('*', ('*', '*'), ('*', '*'))
         day_results.append(planet_results_per_UT1)
 
     return day_results
