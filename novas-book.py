@@ -62,6 +62,8 @@ def decimal2dm_NS (decimal_angle):
     else:
         min = '{:04.1F} S'.format(min)
     
+    min = min.replace('.',',')      # FIX?: Locale-dependent
+
     # convert decimal part to string and remove sign and fraction part. (Important not to round, minutes are separeted!)
     deg = int(abs(decimal_angle))
     deg = '{:02.0F}'.format(deg)
@@ -76,6 +78,7 @@ def decimal2dm_360 (decimal_angle):
     # calculate minutes from fraction part
     min = round(abs(decimal_angle) % 1. * 60, 1)
     min = '{:04.1F}'.format(min)
+    min = min.replace('.',',')  # replace '.' with ',' # FIX?: Locale-dependent
 
     # convert decimal part to string and remove fraction part. (Important not to round, minutes are separeted!)
     deg = int(abs(decimal_angle))
