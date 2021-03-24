@@ -89,6 +89,12 @@ def calculate_ephemerides_planets_day (year, month, day):
     leapseconds = dTAI_UTC_from_utc(datetime(year, month, day)).seconds
     delta_TT_UT1 = (32.184 + leapseconds) / 3600.0
 
+    # Calculate Julian Date for stars. The star-data changes slowly and is always used for two day in the final tables. 
+    # Therefore the time is chosen to be in the middle of such a 2-day-period.
+    # FIX: Do something with the second double-page. 
+    # FIX: Used +23 h instead of +1 day.
+    jd_tt_stars = novas.julian_date(year, month, day, delta_TT_UT1 + 23.0)
+
     day_results = []
     for time_ut1 in range(24): # iterate over 24h of UT1 (=lines in final table for one day)
 
@@ -113,7 +119,7 @@ def calculate_ephemerides_planets_day (year, month, day):
         # calculate position of star
         if time_ut1 < len(stars):
             star_no, star = stars[time_ut1]
-            ra, dec = novas.app_star(jd_tt, star) # FIX: Use fixed time in middle of 2-day-period instead. Star positions are valid for 2 days.
+            ra, dec = novas.app_star(jd_tt_stars, star) # FIX: Use fixed time in middle of 2-day-period instead. Star positions are valid for 2 days.
             sha = 360.0 - (ra * 360.0 / 24.0)  # Calculate sidereal hour angle (SHA) from right ascension and convert from hours to degrees.
             planet_results_per_UT1['stars'] = (star_no, decimal2dm_360(sha), decimal2dm_NS(dec))
         else:
