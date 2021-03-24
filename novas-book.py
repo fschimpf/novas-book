@@ -70,7 +70,7 @@ def decimal2dm_NS (decimal_angle):
     
     return (deg, min)
 
-#convert float to degrees and minuts, full circle
+#convert float to degrees and minutes, full circle
 def decimal2dm_360 (decimal_angle):
     if decimal_angle < 0:
         raise NameError('Invalid sign for full-circle-angle')
@@ -86,6 +86,18 @@ def decimal2dm_360 (decimal_angle):
     
     return (deg, min)
 
+#convert float to minutes, with sign
+def decimal2min (decimal_angle):
+    if abs(decimal_angle) >= 1.0:
+        raise NameError('Angle larger than 1.0. Conversion to minutes failed.')
+    
+    # calculate minutes from fraction part
+    min = round(decimal_angle * 60, 1)
+    min = '{:-5.1F}'.format(min)
+    min = min.replace('.',',')  # replace '.' by ','  FIX?: Locale-dependent
+    
+    return min
+
 def calculate_ephemerides_planets_day (year, month, day):
 
     # Get number of leapseconds between TAI and UTC. This is used for calculating
@@ -95,9 +107,10 @@ def calculate_ephemerides_planets_day (year, month, day):
 
     # Calculate Julian Date for stars. The star-data changes slowly and is always used for two day in the final tables. 
     # Therefore the time is chosen to be in the middle of such a 2-day-period.
+    # DIRTY: Just added one day to the Gregorian date. This can lead to invalid dates, but since novas.julian_date does not check
+    # for validity, this should be fine and lead to same result like adding 24 h.
     # FIX: Do something with the second double-page. 
-    # FIX: Used +23 h instead of +1 day.
-    jd_tt_stars = novas.julian_date(year, month, day, delta_TT_UT1 + 23.0)
+    jd_tt_stars = novas.julian_date(year, month, day + 1, delta_TT_UT1)
 
     day_results = []
     for time_ut1 in range(24): # iterate over 24h of UT1 (=lines in final table for one day)
@@ -118,9 +131,30 @@ def calculate_ephemerides_planets_day (year, month, day):
             grt = theta - ra    # calculate hour angle from GHA and planet's right ascension
             if grt < 0:
                 grt = grt + 360.0
-            if planet_name == 'moon':    # Moon needs special treatment
-                #FIX: Add calculation of differences here
-                planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec), 'xx,x', 'yy,y')
+            if planet_name == 'moon':    # Moon needs some more data:
+                #Calculation of differences to the next hour
+                # Difference to NJ: Difference is given with sign. NJ gives it without sign for moon.
+                # NJ makes rounding errors. This calculation uses higher precision all the way until conversion to string.
+                # Differences of +/- 0.1 min to NJ may occur.
+                ra_next, dec_next, dis_next = novas.app_planet(jd_tt + 0.041666666, planet) # Positions for jd + 1 h
+                theta_next = novas.sidereal_time(jd_ut1 + 0.041666666,0,delta_TT_UT1,1) * 360 / 24
+                ra_next = ra_next * 360.0 / 24.0  # go from hour angle to degrees
+                grt_next = theta_next - ra_next    # calculate hour angle from GHA and planet's right ascension
+                if grt_next < 0:
+                    grt_next = grt_next + 360.0
+
+                 # Calculate hourly declination difference in minutes and convert to string.
+                dec_diff_min = decimal2min(dec_next - dec)  
+
+                # Calculate hourly GRT-difference and subtract "average" hourly difference used for interpolation tables
+                # and convert to minutes and to string.
+                grt_diff_min = (abs(grt_next) - abs(grt) - 14.31666667)
+                if grt_diff_min < 0:
+                    grt_diff_min += 360.0
+                grt_diff_min = decimal2min(grt_diff_min)
+                
+
+                planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec), grt_diff_min, dec_diff_min)
             else:                       # "Normal" planet:
                 planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec))
 
