@@ -39,6 +39,16 @@ stars = [
     (11, novas.make_cat_entry ("Alpha Arietis",     "", 0,   2.119557139,  +23.46241756,   +188.55,    -148.08,      49.56,  +14.2))
 ]
 
+
+# define novas objects List of (novas_object, planet_name)
+sky_objects = []
+sky_objects.append((novas.make_object(0, 10, 'sun', None), 'sun'))
+sky_objects.append((novas.make_object(0, 11, 'moon', None), 'moon'))
+sky_objects.append((novas.make_object(0, 2, 'venus', None), 'venus'))
+sky_objects.append((novas.make_object(0, 4, 'mars', None), 'mars'))
+sky_objects.append((novas.make_object(0, 5, 'jupiter', None), 'jupiter'))
+sky_objects.append((novas.make_object(0, 6, 'saturn', None), 'saturn'))
+
 # convert float to degrees and minutes, 'N' or 'S' instead of sign
 def decimal2dm_NS (decimal_angle):
     if abs(decimal_angle) > 90:
@@ -75,15 +85,6 @@ def decimal2dm_360 (decimal_angle):
 
 def calculate_ephemerides_planets_day (year, month, day):
 
-    # define novas objects List of (novas_object, planet_name)
-    sky_objects = []
-    sky_objects.append((novas.make_object(0, 10, 'sun', None), 'sun'))
-    sky_objects.append((novas.make_object(0, 11, 'moon', None), 'moon'))
-    sky_objects.append((novas.make_object(0, 2, 'venus', None), 'venus'))
-    sky_objects.append((novas.make_object(0, 4, 'mars', None), 'mars'))
-    sky_objects.append((novas.make_object(0, 5, 'jupiter', None), 'jupiter'))
-    sky_objects.append((novas.make_object(0, 6, 'saturn', None), 'saturn'))
-
     # Get number of leapseconds between TAI and UTC. This is used for calculating
     # TT from UT1. TT = leapseconds + 32.184s + UT1. http://www.stjarnhimlen.se/comp/time.html
     leapseconds = dTAI_UTC_from_utc(datetime(year, month, day)).seconds
@@ -114,7 +115,11 @@ def calculate_ephemerides_planets_day (year, month, day):
             grt = theta - ra    # calculate hour angle from GHA and planet's right ascension
             if grt < 0:
                 grt = grt + 360.0
-            planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec))
+            if planet_name == 'moon':    # Moon needs special treatment
+                #FIX: Add calculation of differences here
+                planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec), 'xx,x', 'yy,y')
+            else:                       # "Normal" planet:
+                planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec))
 
         # calculate position of star
         if time_ut1 < len(stars):
@@ -138,8 +143,8 @@ startdate = date(year, 3, 18)
 enddate = date(year, 3, 21)
 
 # Open Jinja-template-files for generating LaTex-document
-document_template = jinja.get_template('NJ_mainDocument.tex.jinja')
-table_eph_day_template = jinja.get_template('NJ_tableEphDay.tex.jinja')
+document_template = jinja.get_template('NJ_mainDocument.jinja.tex')
+table_eph_day_template = jinja.get_template('NJ_tableEphDay.jinja.tex')
 
 # ut1 is used for iterating through list with results from within the Jinja-template 
 ut1 = range(24)
