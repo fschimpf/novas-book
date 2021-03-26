@@ -1,10 +1,10 @@
 \sffamily
 
 ### if (page_is_even == 1)
-  {\Large (((year))) \hspace{1cm} (((month))) \hspace{1cm} (((day))) \hspace{1cm} (((dayofweek)))}
+  {\large (((year))) \hspace{1cm} (((month))) \hspace{1cm} (((day))) \hspace{1cm} (((dayofweek)))}
 ### else
   \begin{flushright}
-  {\Large (((year))) \hspace{1cm} (((month))) \hspace{1cm} (((day))) \hspace{1cm} (((dayofweek)))}
+  {\large (((year))) \hspace{1cm} (((month))) \hspace{1cm} (((day))) \hspace{1cm} (((dayofweek)))}
   \end{flushright}
 ### endif
 
@@ -13,10 +13,10 @@
 
 ### if (page_is_even == 1)
 \begin{center}
-    {\small
+    {\footnotesize
     \begin{tabular}{| c | c c | c c | c c | c | c c | c | c c || c | c c | c c}
-    
-    \rowcolor{gray} & \multicolumn{2}{l}{SONNE} & \multicolumn{2}{l|}{} & \multicolumn{6}{l|}{MOND} & \multicolumn{2}{l||}{FRÜHLP} & \multicolumn{5}{c}{FIXSTERNE} \\ 
+    \hline
+    \rowcolor{gray} (((add.dayOfYear))) & \multicolumn{2}{l}{SONNE} & \multicolumn{2}{l|}{} & \multicolumn{6}{l|}{MOND} & \multicolumn{2}{l||}{FRÜHLP} & \multicolumn{5}{c}{FIXSTERNE} \\ 
     \rowcolor{gray} UT1 & \multicolumn{2}{c}{Grt} & \multicolumn{2}{c|}{$\delta$} & \multicolumn{2}{c}{Grt} & Unt & \multicolumn{2}{c|}{$\delta$} & Unt & \multicolumn{2}{c||}{Grt} & Nr & \multicolumn{2}{c}{$\beta$} & \multicolumn{2}{c}{$\delta$} \\
     \rowcolor{gray} & $^\circ$ & ' & $^\circ$ & ' & $^\circ$ & ' & ' & $^\circ$ & ' & ' & $^\circ$ & ' &  & $^\circ$ & ' & $^\circ$ & ' \\
     
@@ -27,12 +27,16 @@
       ### endif
     ### endfor
 
+    \cline{1-13}
+     & \multicolumn{2}{c}{T xx:xx} & \multicolumn{2}{c|}{Unt x,z'} & \multicolumn{2}{c}{T xx:yy} & \multicolumn{4}{c|}{UT1 4 12 20} & \multicolumn{2}{c||}{T xx:yy} & 42 & 000 & xx,y & 00 & xx,y \\
+     & \multicolumn{4}{c|}{} & \multicolumn{2}{c}{} & \multicolumn{4}{c|}{HP xx,z' xx,z' xx,z'} & \multicolumn{2}{c||}{} &  &  &  &  & \\
+     \hline
     \end{tabular}
     }
 \end{center}
 ### else
 \begin{center}
-    {\small
+    {\footnotesize
     \begin{tabular}{ c | c c | c c | c | c c | c c | c c | c | c c | c | c c |}
     
     \rowcolor{gray} \multicolumn{5}{c|}{FIXSTERNE} &  & \multicolumn{2}{l}{SONNE} & \multicolumn{2}{l|}{} & \multicolumn{6}{l|}{MOND} & \multicolumn{2}{l|}{FRÜHLP}\\ 
@@ -51,13 +55,13 @@
 \end{center}
 ### endif
 
-
+\vspace{0.5cm}
 \begin{center}
-    {\small
-    \begin{tabular}{ c | c c | c c | c c | c c | c c | c c | c c | c c}
-
-    \rowcolor{gray} & \multicolumn{4}{c|}{VENUS} & \multicolumn{4}{c|}{MARS} & \multicolumn{4}{c|}{JUPITER} & \multicolumn{4}{c}{SATURN} \\ 
-    \rowcolor{gray} UT1 & \multicolumn{2}{c}{Grt} & \multicolumn{2}{c|}{$\delta$} & \multicolumn{2}{c}{Grt} & \multicolumn{2}{c|}{$\delta$} & \multicolumn{2}{c}{Grt} & \multicolumn{2}{c|}{$\delta$} & \multicolumn{2}{c}{Grt} & \multicolumn{2}{c}{$\delta$} \\
+    {\footnotesize
+    \begin{tabular}{| c | c c | c c | c c | c c | c c | c c | c c | c c |}
+    \hline
+    \rowcolor{gray} & \multicolumn{4}{c|}{VENUS} & \multicolumn{4}{c|}{MARS} & \multicolumn{4}{c|}{JUPITER} & \multicolumn{4}{c|}{SATURN} \\ 
+    \rowcolor{gray} UT1 & \multicolumn{2}{c|}{Grt} & \multicolumn{2}{c|}{$\delta$} & \multicolumn{2}{c|}{Grt} & \multicolumn{2}{c|}{$\delta$} & \multicolumn{2}{c|}{Grt} & \multicolumn{2}{c|}{$\delta$} & \multicolumn{2}{c|}{Grt} & \multicolumn{2}{c|}{$\delta$} \\
     \rowcolor{gray} & $^\circ$ & ' & $^\circ$ & ' & $^\circ$ & ' & $^\circ$ & ' & $^\circ$ & ' & $^\circ$ & ' & $^\circ$ & ' & $^\circ$ & ' \\
 
     ### for t in ut1
@@ -67,6 +71,11 @@
       ### endif
     ### endfor
   
+    \hline
+    Unt & \multicolumn{2}{r}{-x,y'} &  & -x,y'   & \multicolumn{2}{r}{-x,y'} & \multicolumn{2}{r|}{-x,y'} & \multicolumn{2}{r}{-x,y'} & \multicolumn{2}{r|}{-x,y'} & \multicolumn{2}{r}{-x,y'} & \multicolumn{2}{r|}{-x,y'} \\
+        & \multicolumn{2}{r}{T xx:yy} & HP & x,y' & \multicolumn{2}{r}{T xx:yy} & HP & x,y' & \multicolumn{2}{r}{T xx:yy} & HP & x,y' & \multicolumn{2}{r}{T xx:yy} & HP & x,y' \\
+        & \multicolumn{2}{r}{} & Gr & x,y' & \multicolumn{2}{r}{} & Gr & x,y' & \multicolumn{2}{r}{} & Gr & x,y' & \multicolumn{2}{r}{} & Gr & x,y' \\
+    \hline
     \end{tabular}
     }
 \end{center}

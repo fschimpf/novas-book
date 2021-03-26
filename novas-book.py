@@ -21,7 +21,7 @@ jinja = Environment(
     loader=FileSystemLoader('templates')
 )
 
-weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Sonnabend', 'Sonntag']
+weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
 months = ['','Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 
 # It is not easy to find data for all stars from the same catalog. Wikipedia entries use different catalogs for the entries. Most important
@@ -152,7 +152,6 @@ def calculate_ephemerides_planets_day (year, month, day):
                 if grt_diff_min < 0:
                     grt_diff_min += 360.0
                 grt_diff_min = decimal2min(grt_diff_min)
-                
 
                 planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec), grt_diff_min, dec_diff_min)
             else:                       # "Normal" planet:
@@ -195,13 +194,15 @@ for dt in rrule(DAILY, dtstart=startdate, until=enddate):
     month = int(dt.strftime('%m'))
     day = int(dt.strftime('%d'))
     weekday = weekdays[dt.weekday()]
+    time_tuple = dt.timetuple()
+    additional_data = {'dayOfYear': time_tuple[7]}
     print ('{}, {}.{}.{}'.format(weekday, day, month, year))
 
     # Calculate ephemerides for the selected day
     day_results = calculate_ephemerides_planets_day (year, month, day)
 
     #render day's results into (long) string
-    table = table + table_eph_day_template.render(year=year, month=months[month], day=day, dayofweek=weekday, d=day_results, page_is_even=page_is_even, ut1=ut1)
+    table = table + table_eph_day_template.render(year=year, month=months[month], day=day, dayofweek=weekday, d=day_results, page_is_even=page_is_even, ut1=ut1, add=additional_data)
 
     if page_is_even == 1:
         page_is_even = 0
