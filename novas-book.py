@@ -9,6 +9,8 @@ import os
 from datetime import date
 from dateutil.rrule import rrule, DAILY
 
+from math import atan, pi
+
 from jinja2 import Environment, FileSystemLoader
 jinja = Environment(
     block_start_string = '((*',                     # Set delimiters to LaTex-conform strings
@@ -226,6 +228,11 @@ def calculate_ephemerides_planets_day (year, month, day):
                 grt_diff_min = decimal2min(grt_diff_min)
 
                 planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec), grt_diff_min, dec_diff_min)
+
+                hp = atan(0.0000426343 / dis) * 360 / (2 * pi)
+                print ('Moon distance: {} AE, HP: {}'.format(dis,decimal2dm_360(hp)[1]))
+
+
             else:                       # "Normal" planet:
                 planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec))
 
