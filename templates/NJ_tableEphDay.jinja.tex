@@ -28,7 +28,7 @@
     ### endfor
 
     \cline{1-13}
-     & \multicolumn{2}{c}{T xx:xx} & \multicolumn{2}{c|}{Unt x,z'} & \multicolumn{2}{c}{T xx:yy} & \multicolumn{4}{c|}{UT1 4 12 20} & \multicolumn{2}{c||}{T (((transits.spr_p[0]))):(((transits.spr_p[1])))} & 42 & 000 & xx,y & 00 & xx,y \\
+     & \multicolumn{2}{c}{T (((transits.sun[0]))):(((transits.sun[1])))} & \multicolumn{2}{c|}{Unt x,z'} & \multicolumn{2}{c}{T (((transits.moon[0]))):(((transits.moon[1])))} & \multicolumn{4}{c|}{UT1 4 12 20} & \multicolumn{2}{c||}{T (((transits.spr_p[0]))):(((transits.spr_p[1])))} & 42 & 000 & xx,y & 00 & xx,y \\
      & \multicolumn{4}{c|}{} & \multicolumn{2}{c}{} & \multicolumn{4}{c|}{HP xx,z' xx,z' xx,z'} & \multicolumn{2}{c||}{} &  &  &  &  & \\
      \hline
     \end{tabular}
@@ -37,10 +37,10 @@
 ### else
 \begin{center}
     {\footnotesize
-    \begin{tabular}{ c | c c | c c | c | c c | c c | c c | c | c c | c | c c |}
-    
-    \rowcolor{gray} \multicolumn{5}{c|}{FIXSTERNE} &  & \multicolumn{2}{l}{SONNE} & \multicolumn{2}{l|}{} & \multicolumn{6}{l|}{MOND} & \multicolumn{2}{l|}{FRÜHLP}\\ 
-    \rowcolor{gray} Nr & \multicolumn{2}{c}{$\beta$} & \multicolumn{2}{c|}{$\delta$} & UT1 & \multicolumn{2}{c}{Grt} & \multicolumn{2}{c|}{$\delta$} & \multicolumn{2}{c}{Grt} & Unt & \multicolumn{2}{c|}{$\delta$} & Unt & \multicolumn{2}{c|}{Grt}\\
+    \begin{tabular}{ c | c c | c c || c | c c | c c | c c | c | c c | c | c c |}
+    \hline
+    \rowcolor{gray} \multicolumn{5}{c||}{FIXSTERNE} &  & \multicolumn{2}{l}{SONNE} & \multicolumn{2}{l|}{} & \multicolumn{6}{l|}{MOND} & \multicolumn{2}{l|}{FRÜHLP}\\ 
+    \rowcolor{gray} Nr & \multicolumn{2}{c}{$\beta$} & \multicolumn{2}{c||}{$\delta$} & UT1 & \multicolumn{2}{c}{Grt} & \multicolumn{2}{c|}{$\delta$} & \multicolumn{2}{c}{Grt} & Unt & \multicolumn{2}{c|}{$\delta$} & Unt & \multicolumn{2}{c|}{Grt}\\
     \rowcolor{gray} & $^\circ$ & ' & $^\circ$ & ' & & $^\circ$ & ' & $^\circ$ & ' & $^\circ$ & ' & ' & $^\circ$ & ' & ' & $^\circ$ & '\\
     
     ### for t in ut1
@@ -50,6 +50,10 @@
       ### endif
     ### endfor
 
+    \cline{6-18}
+    80 & 000 & xx,y & 00 & xx,y &  & \multicolumn{2}{c}{T (((transits.sun[0]))):(((transits.sun[1])))} & \multicolumn{2}{c|}{Unt x,z'} & \multicolumn{2}{c}{T (((transits.moon[0]))):(((transits.moon[1])))} & \multicolumn{4}{c|}{UT1 4 12 20}          & \multicolumn{2}{c|}{T (((transits.spr_p[0]))):(((transits.spr_p[1])))}\\
+       &     &      &    &      &  & \multicolumn{4}{c|}{}                                                                              & \multicolumn{2}{c}{}                                               & \multicolumn{4}{c|}{HP xx,z' xx,z' xx,z'} & \multicolumn{2}{c|}{} \\
+    \hline
     \end{tabular}
     }
 \end{center}
@@ -73,7 +77,7 @@
   
     \hline
     Unt & \multicolumn{2}{r}{-x,y'} &  & -x,y'   & \multicolumn{2}{r}{-x,y'} & \multicolumn{2}{r|}{-x,y'} & \multicolumn{2}{r}{-x,y'} & \multicolumn{2}{r|}{-x,y'} & \multicolumn{2}{r}{-x,y'} & \multicolumn{2}{r|}{-x,y'} \\
-        & \multicolumn{2}{r}{T xx:yy} & HP & x,y' & \multicolumn{2}{r}{T xx:yy} & HP & x,y' & \multicolumn{2}{r}{T xx:yy} & HP & x,y' & \multicolumn{2}{r}{T xx:yy} & HP & x,y' \\
+        & \multicolumn{2}{r}{T (((transits.venus[0]))):(((transits.venus[1])))} & HP & x,y' & \multicolumn{2}{r}{T (((transits.mars[0]))):(((transits.mars[1])))} & HP & x,y' & \multicolumn{2}{r}{T (((transits.jupiter[0]))):(((transits.jupiter[1])))} & HP & x,y' & \multicolumn{2}{r}{T (((transits.saturn[0]))):(((transits.saturn[1])))} & HP & x,y' \\
         & \multicolumn{2}{r}{} & Gr & x,y' & \multicolumn{2}{r}{} & Gr & x,y' & \multicolumn{2}{r}{} & Gr & x,y' & \multicolumn{2}{r}{} & Gr & x,y' \\
     \hline
     \end{tabular}
