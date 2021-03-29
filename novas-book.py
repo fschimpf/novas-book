@@ -98,6 +98,42 @@ def decimal2min (decimal_angle):
     
     return min
 
+#convert float to hours and minutes
+def decimal2hm (decimal_angle):
+    if decimal_angle < 0:
+        raise NameError('Invalid sign for time')
+    
+    # calculate minutes from fraction part
+    min = round(abs(decimal_angle) % 1. * 60, 0)
+    min = '{:02.0F}'.format(min)
+    
+    # convert decimal part to string and remove fraction part. (Important not to round, minutes are separeted!)
+    deg = int(abs(decimal_angle))
+    deg = '{:02.0F}'.format(deg)
+    
+    return (deg, min)
+
+# Calculates transit time within tolerance of 10 s. Transit must lie between jd_ut1_left and jd_ut1_right. Return value is in hours. 
+def calculate_transit_spring_point (year, month, day, jd_ut1_left, jd_ut1_right, delta_TT_UT1):
+    delta_ut1 = jd_ut1_right - jd_ut1_left
+    print (delta_ut1)
+    if delta_ut1 > 0.00011574:   # If tolerance greater than 10 s (10s expressed in days)
+        jd_ut1_middle = jd_ut1_left + (delta_ut1 / 2.0)        # choose new time in the middle between jd_ut1_left and jd_ut1_right
+        theta_left = novas.sidereal_time(jd_ut1_left,0,delta_TT_UT1,1) * 360 / 24 # calculate theta for left side
+        theta_middle = novas.sidereal_time(jd_ut1_middle,0,delta_TT_UT1,1) * 360 / 24 # calculate theta for middle
+        if theta_left < theta_middle:  # normal increase of angle, transit must be on right side of middle
+            transit_time = calculate_transit_spring_point (year, month, day, jd_ut1_middle, jd_ut1_right, delta_TT_UT1)    # recursively find transit betw. middle and right
+        else:
+            transit_time = calculate_transit_spring_point (year, month, day, jd_ut1_left, jd_ut1_middle, delta_TT_UT1)    # recursively find transit betw. left and middle
+    else:   # Tolerance fulfilled, find time and return
+        jd_ut1 = novas.julian_date(year, month, day, 0)     # Calculate Julian date for 0:00 this day.
+        transit_time = (jd_ut1_right - jd_ut1) * 24.0         # Difference is transit time in days. *24 = transit time in hours
+        #print ('recursion finished. Transit: ', transit_time)
+
+    return transit_time
+    
+
+
 def calculate_ephemerides_planets_day (year, month, day):
 
     # Get number of leapseconds between TAI and UTC. This is used for calculating
@@ -113,6 +149,8 @@ def calculate_ephemerides_planets_day (year, month, day):
     jd_tt_stars = novas.julian_date(year, month, day + 1, delta_TT_UT1)
 
     day_results = []
+    #transits = {}
+    theta_old = 0
     for time_ut1 in range(24): # iterate over 24h of UT1 (=lines in final table for one day)
 
         # calculate Julian date of TT and UT1 
@@ -123,6 +161,17 @@ def calculate_ephemerides_planets_day (year, month, day):
         # calculate Greenwich hour angle (GHA) for spring point
         theta = novas.sidereal_time(jd_ut1,0,delta_TT_UT1,1) * 360 / 24
         planet_results_per_UT1 = {'spr_p': decimal2dm_360(theta)}
+
+        """
+        # check if transit time for spring point has been passed. If yes, calculate transit time
+        if theta < theta_old:
+            # If theta jumps to lower values, transit time must be within this time and one hour earlier.
+            transits = {'spr_p': decimal2hm(calculate_transit_spring_point (year, month, day, jd_ut1 - (1.0/24.0), jd_ut1, delta_TT_UT1))}
+            print ('Transit: {}:{}'.format(transits['spr_p'][0], transits['spr_p'][1]))
+            theta_old = theta
+        else:
+            theta_old = theta
+        """
 
         # calculate Greenwich hour angle and declination for planets (sun and moon are considered planets)
         for (planet, planet_name) in sky_objects:
@@ -167,7 +216,12 @@ def calculate_ephemerides_planets_day (year, month, day):
             planet_results_per_UT1['stars'] = ('*', ('*', '*'), ('*', '*'))
         day_results.append(planet_results_per_UT1)
 
-    return day_results
+    # Calculate transit times
+    jd_ut1 = novas.julian_date(year, month, day, 0.0) # Start for possible transit 00:00 h that day, end + 1 day
+    transits = {'spr_p': decimal2hm(calculate_transit_spring_point (year, month, day, jd_ut1, jd_ut1 + 1.0, delta_TT_UT1))}
+    print ('Transit: {}:{}'.format(transits['spr_p'][0], transits['spr_p'][1]))
+
+    return day_results, transits
 
 
 # Start Main...
@@ -199,7 +253,7 @@ for dt in rrule(DAILY, dtstart=startdate, until=enddate):
     print ('{}, {}.{}.{}'.format(weekday, day, month, year))
 
     # Calculate ephemerides for the selected day
-    day_results = calculate_ephemerides_planets_day (year, month, day)
+    day_results, transits = calculate_ephemerides_planets_day (year, month, day)
 
     #render day's results into (long) string
     table = table + table_eph_day_template.render(year=year, month=months[month], day=day, dayofweek=weekday, d=day_results, page_is_even=page_is_even, ut1=ut1, add=additional_data)
