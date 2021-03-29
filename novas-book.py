@@ -116,7 +116,6 @@ def decimal2hm (decimal_angle):
 # Calculates transit time within tolerance of 10 s. Transit must lie between jd_ut1_left and jd_ut1_right. Return value is in hours. 
 def calculate_transit_spring_point (year, month, day, jd_ut1_left, jd_ut1_right, delta_TT_UT1):
     delta_ut1 = jd_ut1_right - jd_ut1_left
-    print (delta_ut1)
     if delta_ut1 > 0.00011574:   # If tolerance greater than 10 s (10s expressed in days)
         jd_ut1_middle = jd_ut1_left + (delta_ut1 / 2.0)        # choose new time in the middle between jd_ut1_left and jd_ut1_right
         theta_left = novas.sidereal_time(jd_ut1_left,0,delta_TT_UT1,1) * 360 / 24 # calculate theta for left side
@@ -131,6 +130,43 @@ def calculate_transit_spring_point (year, month, day, jd_ut1_left, jd_ut1_right,
         #print ('recursion finished. Transit: ', transit_time)
 
     return transit_time
+
+def calculate_grt_planet (jd_tt, theta, planet):
+        ra, dec, dis = novas.app_planet(jd_tt, planet)
+        ra = ra * 360.0 / 24.0  # go from hour angle to degrees
+        grt = theta - ra    # calculate hour angle from GHA and planet's right ascension
+        if grt < 0:
+            grt = grt + 360.0
+        return grt
+
+# Calculates transit time within tolerance of 10 s. Transit must lie between jd_ut1_left and jd_ut1_right. Return value is in hours. 
+def calculate_transit_planet (year, month, day, jd_ut1_left, jd_ut1_right, delta_TT_UT1, planet):
+    delta_ut1 = jd_ut1_right - jd_ut1_left
+    if delta_ut1 > 0.00011574:   # If tolerance greater than 10 s (10s expressed in days)
+        jd_ut1_middle = jd_ut1_left + (delta_ut1 / 2.0)        # choose new time in the middle between jd_ut1_left and jd_ut1_right
+        theta_left = novas.sidereal_time(jd_ut1_left,0,delta_TT_UT1,1) * 360 / 24 # calculate theta for left side
+        theta_middle = novas.sidereal_time(jd_ut1_middle,0,delta_TT_UT1,1) * 360 / 24 # calculate theta for middle
+
+        # calculate Julian dates in TT 
+        jd_tt_left = jd_ut1_left + (delta_TT_UT1 / 86400.0)     # add delta_TT_UT1 in days FIX: Is precision sufficient?
+        jd_tt_middle = jd_ut1_middle + (delta_TT_UT1 / 86400.0) # add delta_TT_UT1 in days FIX: Is precision sufficient?
+
+        # calculate planets GRT        
+        grt_left = calculate_grt_planet (jd_tt_left, theta_left, planet)
+        grt_middle = calculate_grt_planet (jd_tt_middle, theta_middle, planet)
+
+        if grt_left < grt_middle:  # normal increase of angle, transit must be on right side of middle
+            transit_time = calculate_transit_planet (year, month, day, jd_ut1_middle, jd_ut1_right, delta_TT_UT1, planet)    # recursively find transit betw. middle and right
+        else:
+            transit_time = calculate_transit_planet (year, month, day, jd_ut1_left, jd_ut1_middle, delta_TT_UT1, planet)    # recursively find transit betw. left and middle
+
+    else:   # Tolerance fulfilled, find time and return transit time
+        jd_ut1 = novas.julian_date(year, month, day, 0)     # Calculate Julian date for 0:00 this day.
+        
+        transit_time = (jd_ut1_right - jd_ut1) * 24.0         # Difference is transit time in days. *24 = transit time in hours
+        #print ('recursion finished. Transit: ', transit_time)
+
+    return transit_time
     
 
 
@@ -139,7 +175,7 @@ def calculate_ephemerides_planets_day (year, month, day):
     # Get number of leapseconds between TAI and UTC. This is used for calculating
     # TT from UT1. TT = leapseconds + 32.184s + UT1. http://www.stjarnhimlen.se/comp/time.html
     leapseconds = dTAI_UTC_from_utc(datetime(year, month, day)).seconds
-    delta_TT_UT1 = (32.184 + leapseconds) / 3600.0
+    delta_TT_UT1 = (32.184 + leapseconds) / 3600.0  # time difference in hours
 
     # Calculate Julian Date for stars. The star-data changes slowly and is always used for two day in the final tables. 
     # Therefore the time is chosen to be in the middle of such a 2-day-period.
@@ -148,9 +184,7 @@ def calculate_ephemerides_planets_day (year, month, day):
     # FIX: Do something with the second double-page. 
     jd_tt_stars = novas.julian_date(year, month, day + 1, delta_TT_UT1)
 
-    day_results = []
-    #transits = {}
-    theta_old = 0
+    planets = []
     for time_ut1 in range(24): # iterate over 24h of UT1 (=lines in final table for one day)
 
         # calculate Julian date of TT and UT1 
@@ -161,17 +195,6 @@ def calculate_ephemerides_planets_day (year, month, day):
         # calculate Greenwich hour angle (GHA) for spring point
         theta = novas.sidereal_time(jd_ut1,0,delta_TT_UT1,1) * 360 / 24
         planet_results_per_UT1 = {'spr_p': decimal2dm_360(theta)}
-
-        """
-        # check if transit time for spring point has been passed. If yes, calculate transit time
-        if theta < theta_old:
-            # If theta jumps to lower values, transit time must be within this time and one hour earlier.
-            transits = {'spr_p': decimal2hm(calculate_transit_spring_point (year, month, day, jd_ut1 - (1.0/24.0), jd_ut1, delta_TT_UT1))}
-            print ('Transit: {}:{}'.format(transits['spr_p'][0], transits['spr_p'][1]))
-            theta_old = theta
-        else:
-            theta_old = theta
-        """
 
         # calculate Greenwich hour angle and declination for planets (sun and moon are considered planets)
         for (planet, planet_name) in sky_objects:
@@ -214,14 +237,20 @@ def calculate_ephemerides_planets_day (year, month, day):
             planet_results_per_UT1['stars'] = (star_no, decimal2dm_360(sha), decimal2dm_NS(dec))
         else:
             planet_results_per_UT1['stars'] = ('*', ('*', '*'), ('*', '*'))
-        day_results.append(planet_results_per_UT1)
+        
+        planets.append(planet_results_per_UT1)
 
-    # Calculate transit times
+    # Calculate transit time for spring point
     jd_ut1 = novas.julian_date(year, month, day, 0.0) # Start for possible transit 00:00 h that day, end + 1 day
     transits = {'spr_p': decimal2hm(calculate_transit_spring_point (year, month, day, jd_ut1, jd_ut1 + 1.0, delta_TT_UT1))}
-    print ('Transit: {}:{}'.format(transits['spr_p'][0], transits['spr_p'][1]))
+    print ('Transit spring point: {}:{}'.format(transits['spr_p'][0], transits['spr_p'][1]))
 
-    return day_results, transits
+    # Transit times for planets
+    for (planet, planet_name) in sky_objects:
+        transits[planet_name] = decimal2hm(calculate_transit_planet (year, month, day, jd_ut1, jd_ut1 + 1.0, delta_TT_UT1, planet))
+        print ('Transit {}: {}:{}'.format(planet_name, transits[planet_name][0], transits[planet_name][1]))
+
+    return planets, transits
 
 
 # Start Main...
@@ -253,10 +282,10 @@ for dt in rrule(DAILY, dtstart=startdate, until=enddate):
     print ('{}, {}.{}.{}'.format(weekday, day, month, year))
 
     # Calculate ephemerides for the selected day
-    day_results, transits = calculate_ephemerides_planets_day (year, month, day)
+    planets, transits = calculate_ephemerides_planets_day (year, month, day)
 
     #render day's results into (long) string
-    table = table + table_eph_day_template.render(year=year, month=months[month], day=day, dayofweek=weekday, d=day_results, page_is_even=page_is_even, ut1=ut1, add=additional_data)
+    table = table + table_eph_day_template.render(year=year, month=months[month], day=day, dayofweek=weekday, d=planets, page_is_even=page_is_even, ut1=ut1, add=additional_data, transits=transits)
 
     if page_is_even == 1:
         page_is_even = 0
