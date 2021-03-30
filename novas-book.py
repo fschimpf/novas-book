@@ -115,6 +115,20 @@ def decimal2hm (decimal_angle):
     
     return (deg, min)
 
+#convert float to only minutes with sign
+def decimal2m (decimal_angle):
+    if abs(decimal_angle) > 1.0:
+        raise NameError('Angle too large for converting to only minutes')
+    
+    # calculate minutes from fraction part
+    min = round(abs(decimal_angle) % 1. * 60, 1)
+    if decimal_angle < 0:
+        min = 0 - min 
+    min = '{:-3.1F}'.format(min)
+    
+    min = min.replace('.',',')  # replace '.' by ','  FIX?: Locale-dependent
+    return min
+
 # Calculates transit time within tolerance of 10 s. Transit must lie between jd_ut1_left and jd_ut1_right. Return value is in hours. 
 def calculate_transit_spring_point (year, month, day, jd_ut1_left, jd_ut1_right, delta_TT_UT1):
     delta_ut1 = jd_ut1_right - jd_ut1_left
@@ -169,6 +183,38 @@ def calculate_transit_planet (year, month, day, jd_ut1_left, jd_ut1_right, delta
         #print ('recursion finished. Transit: ', transit_time)
 
     return transit_time
+
+# Find average differences over one day for use in interpolation/correction tables (valid for planetes and sun)
+# returns GHA difference and dec-difference in minutes.
+def calculate_avg_differences (jd_ut1, delta_TT_UT1, planet):
+    jd_tt = jd_ut1 + (delta_TT_UT1 / 86400.0)     # add delta_TT_UT1 in days FIX: Is precision sufficient?
+    theta_start = novas.sidereal_time(jd_ut1,0,delta_TT_UT1,1) * 360 / 24
+    ra, dec_start, dis = novas.app_planet(jd_tt, planet)
+    ra = ra * 360.0 / 24.0  # go from hour angle to degrees
+    grt_start = theta_start - ra    # calculate hour angle from GHA and planet's right ascension
+    if grt_start < 0:
+        grt_start = grt_start + 360.0
+
+    jd_tt_end = jd_ut1 + 1.0 + (delta_TT_UT1 / 86400.0)     # add delta_TT_UT1 in days FIX: Is precision sufficient?
+    theta_end = novas.sidereal_time(jd_ut1 + 1.0 ,0,delta_TT_UT1,1) * 360 / 24
+    ra, dec_end, dis = novas.app_planet(jd_tt_end, planet)
+    ra = ra * 360.0 / 24.0  # go from hour angle to degrees
+    grt_end = theta_end - ra    # calculate hour angle from GHA and planet's right ascension
+    if grt_end < 0:
+        grt_end = grt_end + 360.0
+
+    d_grt = (grt_end - grt_start)
+    if d_grt > 360.0:
+        d_grt = d_grt - 360.0
+    d_grt_hourly = d_grt / 24.0   # calculate average hourly difference and subtract average sideral change of GRT.
+    d_grt = decimal2m(d_grt_hourly)   # convert to string and take only minutes
+
+    d_dec = (dec_end - dec_start) / 24.0
+    d_dec = decimal2m(d_dec)   # convert to string and take only minutes
+
+    return d_grt, d_dec
+    
+
     
 def horizontal_parallaxe (distance):      # calculates horizontal parallaxe for body with given distance from earth (unit: AU). Returns HP in arcminutes
     hp = atan(0.0000426343 / distance) * 360 / (2 * pi)  # HP in degrees = atan (earth_raduis[AU] / distance [AU])
@@ -259,6 +305,12 @@ def calculate_ephemerides_day (year, month, day):
         transits[planet_name] = decimal2hm(calculate_transit_planet (year, month, day, jd_ut1, jd_ut1 + 1.0, delta_TT_UT1, planet))
         #print ('Transit {}: {}:{}'.format(planet_name, transits[planet_name][0], transits[planet_name][1]))
 
+    # Average differences for sun and planets
+    jd_ut1 = novas.julian_date(year, month, day, 0.0) # Start 00:00 h that day
+    for (planet, planet_name) in sky_objects:
+        if planet_name != 'moon': 
+            transits['diff_' + planet_name] = calculate_avg_differences (jd_ut1, delta_TT_UT1, planet)
+            print ('difference {}: Grt:{}, Dec:{}'.format(planet_name, transits['diff_' + planet_name][0], transits['diff_' + planet_name][1]))
     return planets, transits
 
 
