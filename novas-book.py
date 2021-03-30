@@ -170,9 +170,12 @@ def calculate_transit_planet (year, month, day, jd_ut1_left, jd_ut1_right, delta
 
     return transit_time
     
+def horizontal_parallaxe (distance):      # calculates horizontal parallaxe for body with given distance from earth (unit: AU). Returns HP in arcminutes
+    hp = atan(0.0000426343 / distance) * 360 / (2 * pi)  # HP in degrees = atan (earth_raduis[AU] / distance [AU])
+    hp_minutes = decimal2dm_360(hp)[1]              # expected result is smaller than 1 degree, take only minutes part.
+    return hp_minutes
 
-
-def calculate_ephemerides_planets_day (year, month, day):
+def calculate_ephemerides_day (year, month, day):
 
     # Get number of leapseconds between TAI and UTC. This is used for calculating
     # TT from UT1. TT = leapseconds + 32.184s + UT1. http://www.stjarnhimlen.se/comp/time.html
@@ -229,9 +232,8 @@ def calculate_ephemerides_planets_day (year, month, day):
 
                 planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec), grt_diff_min, dec_diff_min)
 
-                hp = atan(0.0000426343 / dis) * 360 / (2 * pi)
-                print ('Moon distance: {} AE, HP: {}'.format(dis,decimal2dm_360(hp)[1]))
-
+                hp = horizontal_parallaxe (dis)
+                print ('Moon distance: {} AE, HP: {}'.format(dis, hp))
 
             else:                       # "Normal" planet:
                 planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec))
@@ -250,12 +252,12 @@ def calculate_ephemerides_planets_day (year, month, day):
     # Calculate transit time for spring point
     jd_ut1 = novas.julian_date(year, month, day, 0.0) # Start for possible transit 00:00 h that day, end + 1 day
     transits = {'spr_p': decimal2hm(calculate_transit_spring_point (year, month, day, jd_ut1, jd_ut1 + 1.0, delta_TT_UT1))}
-    print ('Transit spring point: {}:{}'.format(transits['spr_p'][0], transits['spr_p'][1]))
+    #print ('Transit spring point: {}:{}'.format(transits['spr_p'][0], transits['spr_p'][1]))
 
     # Transit times for planets
     for (planet, planet_name) in sky_objects:
         transits[planet_name] = decimal2hm(calculate_transit_planet (year, month, day, jd_ut1, jd_ut1 + 1.0, delta_TT_UT1, planet))
-        print ('Transit {}: {}:{}'.format(planet_name, transits[planet_name][0], transits[planet_name][1]))
+        #print ('Transit {}: {}:{}'.format(planet_name, transits[planet_name][0], transits[planet_name][1]))
 
     return planets, transits
 
@@ -289,7 +291,7 @@ for dt in rrule(DAILY, dtstart=startdate, until=enddate):
     print ('{}, {}.{}.{}'.format(weekday, day, month, year))
 
     # Calculate ephemerides for the selected day
-    planets, transits = calculate_ephemerides_planets_day (year, month, day)
+    planets, transits = calculate_ephemerides_day (year, month, day)
 
     #render day's results into (long) string
     table = table + table_eph_day_template.render(year=year, month=months[month], day=day, dayofweek=weekday, d=planets, page_is_even=page_is_even, ut1=ut1, add=additional_data, transits=transits)
