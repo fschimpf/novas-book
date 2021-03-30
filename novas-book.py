@@ -305,10 +305,12 @@ def calculate_ephemerides_day (year, month, day):
         transits[planet_name] = decimal2hm(calculate_transit_planet (year, month, day, jd_ut1, jd_ut1 + 1.0, delta_TT_UT1, planet))
         if planet_name != 'moon': 
             transits['diff_' + planet_name] = calculate_avg_differences (jd_ut1, delta_TT_UT1, planet)
-            
-            ra, dec, dis = novas.app_planet(jd_ut1 + 0.5, planet)
+            ra, dec, dis = novas.app_planet(jd_ut1 + 0.5, planet)   # use "middle of day" for finding parallaxe
             transits['hp_' + planet_name] = horizontal_parallaxe (dis)
             print ('HP {}: {}'.format(planet_name, transits['hp_' + planet_name]))
+            if planet_name == 'sun':
+                transits['r_sun'] = decimal2m(atan(0.00465476/dis) * 360 / (2 * pi))
+                print('Sonnenradius: {}'.format(transits['r_sun']))
     return planets, transits
 
 
