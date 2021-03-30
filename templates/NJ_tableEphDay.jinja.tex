@@ -28,8 +28,8 @@
     ### endfor
 
     \cline{1-13}
-     & \multicolumn{2}{c}{T (((transits.sun[0]))):(((transits.sun[1])))} & \multicolumn{2}{c|}{Unt x,z'} & \multicolumn{2}{c}{T (((transits.moon[0]))):(((transits.moon[1])))} & \multicolumn{4}{c|}{UT1 4 12 20} & \multicolumn{2}{c||}{T (((transits.spr_p[0]))):(((transits.spr_p[1])))} & 42 & 000 & xx,y & 00 & xx,y \\
-     & \multicolumn{4}{c|}{} & \multicolumn{2}{c}{} & \multicolumn{4}{c|}{HP xx,z' xx,z' xx,z'} & \multicolumn{2}{c||}{} &  &  &  &  & \\
+     & \multicolumn{2}{c}{T (((transits.sun[0]))):(((transits.sun[1])))} & \multicolumn{2}{c|}{Unt x,z'} & \multicolumn{2}{c}{T (((transits.moon[0]))):(((transits.moon[1])))} & \multicolumn{4}{c|}{\begin{tabular}{m{0.5cm} m{0.5cm} m{0.5cm} m{0.5cm}} UT1 & 4 & 12 & 20 \end{tabular}} & \multicolumn{2}{c||}{T (((transits.spr_p[0]))):(((transits.spr_p[1])))} & 42 & 000 & xx,y & 00 & xx,y \\
+     & \multicolumn{4}{c|}{} & \multicolumn{2}{c}{} & \multicolumn{4}{c|}{\begin{tabular}{m{0.5cm} m{0.5cm} m{0.5cm} m{0.5cm}} HP & (((d[4].hp_moon)))' & (((d[12].hp_moon)))' & (((d[20].hp_moon)))' \end{tabular}} & \multicolumn{2}{c||}{} &  &  &  &  & \\
      \hline
     \end{tabular}
     }
@@ -51,8 +51,8 @@
     ### endfor
 
     \cline{6-18}
-    80 & 000 & xx,y & 00 & xx,y &  & \multicolumn{2}{c}{T (((transits.sun[0]))):(((transits.sun[1])))} & \multicolumn{2}{c|}{Unt x,z'} & \multicolumn{2}{c}{T (((transits.moon[0]))):(((transits.moon[1])))} & \multicolumn{4}{c|}{UT1 4 12 20}          & \multicolumn{2}{c|}{T (((transits.spr_p[0]))):(((transits.spr_p[1])))}\\
-       &     &      &    &      &  & \multicolumn{4}{c|}{}                                                                              & \multicolumn{2}{c}{}                                               & \multicolumn{4}{c|}{HP xx,z' xx,z' xx,z'} & \multicolumn{2}{c|}{} \\
+    80 & 000 & xx,y & 00 & xx,y &  & \multicolumn{2}{c}{T (((transits.sun[0]))):(((transits.sun[1])))} & \multicolumn{2}{c|}{Unt x,z'} & \multicolumn{2}{c}{T (((transits.moon[0]))):(((transits.moon[1])))} & \multicolumn{4}{c|}{\begin{tabular}{m{0.5cm} m{0.5cm} m{0.5cm} m{0.5cm}}    UT1 & 4                   & 12                   & 20 \end{tabular}}                   & \multicolumn{2}{c|}{T (((transits.spr_p[0]))):(((transits.spr_p[1])))}\\
+       &     &      &    &      &  & \multicolumn{4}{c|}{}                                                                              & \multicolumn{2}{c}{}                                               & \multicolumn{4}{c|}{\begin{tabular}{m{0.5cm} m{0.5cm} m{0.5cm} m{0.5cm}} HP & (((d[4].hp_moon)))' & (((d[12].hp_moon)))' & (((d[20].hp_moon)))' \end{tabular}} & \multicolumn{2}{c|}{} \\
     \hline
     \end{tabular}
     }

@@ -229,11 +229,11 @@ def calculate_ephemerides_day (year, month, day):
                 if grt_diff_min < 0:
                     grt_diff_min += 360.0
                 grt_diff_min = decimal2min(grt_diff_min)
-
                 planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec), grt_diff_min, dec_diff_min)
 
-                hp = horizontal_parallaxe (dis)
-                print ('Moon distance: {} AE, HP: {}'.format(dis, hp))
+                # Get horizontal parallaxe at UT1 = 4, 12, 20
+                if time_ut1 in [4, 12, 20]:
+                    planet_results_per_UT1['hp_moon'] = horizontal_parallaxe (dis)
 
             else:                       # "Normal" planet:
                 planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec))
