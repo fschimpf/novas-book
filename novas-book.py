@@ -218,7 +218,7 @@ def calculate_avg_differences (jd_ut1, delta_TT_UT1, planet):
     
 def horizontal_parallaxe (distance):      # calculates horizontal parallaxe for body with given distance from earth (unit: AU). Returns HP in arcminutes
     hp = atan(0.0000426343 / distance) * 360 / (2 * pi)  # HP in degrees = atan (earth_raduis[AU] / distance [AU])
-    hp_minutes = decimal2dm_360(hp)[1]              # expected result is smaller than 1 degree, take only minutes part.
+    hp_minutes = decimal2m(hp)              # expected result is smaller than 1 degree, take only minutes part.
     return hp_minutes
 
 def calculate_ephemerides_day (year, month, day):
@@ -300,17 +300,15 @@ def calculate_ephemerides_day (year, month, day):
     transits = {'spr_p': decimal2hm(calculate_transit_spring_point (year, month, day, jd_ut1, jd_ut1 + 1.0, delta_TT_UT1))}
     #print ('Transit spring point: {}:{}'.format(transits['spr_p'][0], transits['spr_p'][1]))
 
-    # Transit times for planets
+    # Transit times for planets, average differences and horizontal parallaxe
     for (planet, planet_name) in sky_objects:
         transits[planet_name] = decimal2hm(calculate_transit_planet (year, month, day, jd_ut1, jd_ut1 + 1.0, delta_TT_UT1, planet))
-        #print ('Transit {}: {}:{}'.format(planet_name, transits[planet_name][0], transits[planet_name][1]))
-
-    # Average differences for sun and planets
-    jd_ut1 = novas.julian_date(year, month, day, 0.0) # Start 00:00 h that day
-    for (planet, planet_name) in sky_objects:
         if planet_name != 'moon': 
             transits['diff_' + planet_name] = calculate_avg_differences (jd_ut1, delta_TT_UT1, planet)
-            print ('difference {}: Grt:{}, Dec:{}'.format(planet_name, transits['diff_' + planet_name][0], transits['diff_' + planet_name][1]))
+            
+            ra, dec, dis = novas.app_planet(jd_ut1 + 0.5, planet)
+            transits['hp_' + planet_name] = horizontal_parallaxe (dis)
+            print ('HP {}: {}'.format(planet_name, transits['hp_' + planet_name]))
     return planets, transits
 
 
