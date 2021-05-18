@@ -117,11 +117,11 @@ def decimal2hm (decimal_angle):
 
 #convert float to only minutes with sign
 def decimal2m (decimal_angle):
-    if abs(decimal_angle) > 1.0:
-        raise NameError('Angle too large for converting to only minutes')
+    #if abs(decimal_angle) > 1.0:
+    #    raise NameError('Angle too large for converting to only minutes')
     
     # calculate minutes from fraction part
-    min = round(abs(decimal_angle) % 1. * 60, 1)
+    min = round(abs(decimal_angle) * 60, 1)
     if decimal_angle < 0:
         min = 0 - min 
     min = '{:-3.1F}'.format(min)
@@ -230,10 +230,9 @@ def calculate_ephemerides_day (year, month, day):
 
     # Calculate Julian Date for stars. The star-data changes slowly and is always used for two day in the final tables. 
     # Therefore the time is chosen to be in the middle of such a 2-day-period.
-    # DIRTY: Just added one day to the Gregorian date. This can lead to invalid dates, but since novas.julian_date does not check
-    # for validity, this should be fine and lead to same result like adding 24 h.
+    # DIRTY: Just added 23.5 h the Gregorian date.
     # FIX: Do something with the second double-page. 
-    jd_tt_stars = novas.julian_date(year, month, day + 1, delta_TT_UT1)
+    jd_tt_stars = novas.julian_date(year, month, day, delta_TT_UT1 + 23.5)
 
     planets = []
     for time_ut1 in range(24): # iterate over 24h of UT1 (=lines in final table for one day)
@@ -311,6 +310,18 @@ def calculate_ephemerides_day (year, month, day):
             if planet_name == 'sun':
                 transits['r_sun'] = decimal2m(atan(0.00465476/dis) * 360 / (2 * pi))
                 print('Sonnenradius: {}'.format(transits['r_sun']))
+        else: # moon, find days since new moon
+            time_tt = delta_TT_UT1 + 0.0    # ut1 = 0h 
+            jd_tt = novas.julian_date(year, month, day, time_tt)
+            jd_ut1 = novas.julian_date(year, month, day, time_ut1)
+            theta = novas.sidereal_time(jd_ut1,0,delta_TT_UT1,1) * 360 / 24
+            ra, dec, dis = novas.app_planet(jd_tt, planet)
+            ra = ra * 360.0 / 24.0  # go from hour angle to degrees
+            grt = theta - ra    # calculate hour angle from GHA and planet's right ascension
+            if grt < 0:
+                grt = grt + 360.0
+
+            transits['age_moon'] = 'x,y'
     return planets, transits
 
 
@@ -318,9 +329,9 @@ def calculate_ephemerides_day (year, month, day):
 # Open ephemerides database
 jd_start, jd_end, number = eph_manager.ephem_open()
 
-year = 2005
-startdate = date(year, 3, 18)
-enddate = date(year, 3, 21)
+year = 2021
+startdate = date(year, 5, 1)
+enddate = date(year, 6, 30)
 
 # Open Jinja-template-files for generating LaTex-document
 document_template = jinja.get_template('NJ_mainDocument.jinja.tex')
