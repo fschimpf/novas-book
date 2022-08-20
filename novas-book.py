@@ -27,13 +27,13 @@ weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'
 months = ['','Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 
 # It is not easy to find data for all stars from the same catalog. Wikipedia entries use different catalogs for the entries. Most important
-# is that coordinats are referenced for Epoch J2000 and Equinox J2000.0 (ICRS). That is the case in Wikipedia. I used these entries. 
-# Entries for catalog and catalog number are therefore left empty.
+# is that coordinats are referenced for Epoch J2000 and Equinox J2000.0 (ICRS). 
+# Entries for catalog and catalog number are left empty.
 # tuple for stars: (no_in_Nautisches_Jahrbuch, novas-entry)
 stars = [
     #                                                                                      motion       motion     parallax radial velocity
     #                             Name            Cat  No       Ra[h]        delta[deg]   Ra[mas/a]   Dec [mas/a]  [mas]     [km/s]
-    (1,  novas.make_cat_entry ("Alpha Andromedae",  "", 0,   0.139794411,  -29.09043111,   +135.68,    -162.95,      33.62,  -10.6)),
+    (1,  novas.make_cat_entry ("Alpha Andromedae",  "", 0,   0.139794444,  +29.09044444,   +135.68,    -162.95,      33.62,  -10.6)),
     (3,  novas.make_cat_entry ("Alpha Phoenicis",   "", 0,   0.438069833,  -42.30598719,   +233.05,    -356.3,       38.5,   +74.6)),
     (4,  novas.make_cat_entry ("Alpha Cassiopeiae", "", 0,   0.675122527,  +56.53733111,   +50.88,     -32.13,       14.29,  -4.31)),
     (5,  novas.make_cat_entry ("Beta Ceti",         "", 0,   0.726491916,  -17.98660631,   +232.55,    +31.99,       33.86,  +12.9)),
@@ -301,15 +301,16 @@ def calculate_ephemerides_day (year, month, day):
 
     # Transit times for planets, average differences and horizontal parallaxe
     for (planet, planet_name) in sky_objects:
+        jd_ut1 = novas.julian_date(year, month, day, 0.0) # Start for possible transit 00:00 h that day, end + 1 day
         transits[planet_name] = decimal2hm(calculate_transit_planet (year, month, day, jd_ut1, jd_ut1 + 1.0, delta_TT_UT1, planet))
         if planet_name != 'moon': 
             transits['diff_' + planet_name] = calculate_avg_differences (jd_ut1, delta_TT_UT1, planet)
             ra, dec, dis = novas.app_planet(jd_ut1 + 0.5, planet)   # use "middle of day" for finding parallaxe
             transits['hp_' + planet_name] = horizontal_parallaxe (dis)
-            print ('HP {}: {}'.format(planet_name, transits['hp_' + planet_name]))
+            #print ('HP {}: {}'.format(planet_name, transits['hp_' + planet_name]))
             if planet_name == 'sun':
                 transits['r_sun'] = decimal2m(atan(0.00465476/dis) * 360 / (2 * pi))
-                print('Sonnenradius: {}'.format(transits['r_sun']))
+                #print('Sonnenradius: {}'.format(transits['r_sun']))
         else: # moon, find days since new moon
             time_tt = delta_TT_UT1 + 0.0    # ut1 = 0h 
             jd_tt = novas.julian_date(year, month, day, time_tt)
@@ -329,7 +330,7 @@ def calculate_ephemerides_day (year, month, day):
 # Open ephemerides database
 jd_start, jd_end, number = eph_manager.ephem_open()
 
-year = 2022
+year = 2005
 startdate = date(year, 1, 1)
 enddate = date(year, 12, 31)
 
@@ -351,7 +352,7 @@ for dt in rrule(DAILY, dtstart=startdate, until=enddate):
     weekday = weekdays[dt.weekday()]
     time_tuple = dt.timetuple()
     additional_data = {'dayOfYear': time_tuple[7]}
-    print ('{}, {}.{}.{}'.format(weekday, day, month, year))
+    print ('calculating page for {}, {}.{}.{}'.format(weekday, day, month, year))
 
     # Calculate ephemerides for the selected day
     planets, transits = calculate_ephemerides_day (year, month, day)
