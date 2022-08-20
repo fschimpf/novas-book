@@ -5,6 +5,7 @@ from novas import compat as novas
 from novas.compat import eph_manager
 
 import os
+import sys
 
 from datetime import date
 from dateutil.rrule import rrule, DAILY
@@ -330,7 +331,16 @@ def calculate_ephemerides_day (year, month, day):
 # Open ephemerides database
 jd_start, jd_end, number = eph_manager.ephem_open()
 
-year = 2022
+try:
+    year = int(sys.argv[1])
+except ValueError:
+    print ('Error: No year given. Usage: novas-book.py <year to calculate>')
+    sys.exit(2)
+
+if (year < 1960) or (year > 2100):
+    print ('Error: Invalid year. Valid range for year: 1950..2100')
+    sys.exit(2)
+
 startdate = date(year, 1, 1)
 enddate = date(year, 12, 31)
 
