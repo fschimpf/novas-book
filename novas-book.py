@@ -330,7 +330,7 @@ def calculate_ephemerides_day (year, month, day):
 # Open ephemerides database
 jd_start, jd_end, number = eph_manager.ephem_open()
 
-year = 2005
+year = 2022
 startdate = date(year, 1, 1)
 enddate = date(year, 12, 31)
 
