@@ -32,14 +32,24 @@ months = ['','Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'Augu
 # Entries for catalog and catalog number are left empty.
 # tuple for stars: (no_in_Nautisches_Jahrbuch, novas-entry)
 stars = [
-    #                                                                                      motion       motion     parallax radial velocity
-    #                             Name            Cat  No       Ra[h]        delta[deg]   Ra[mas/a]   Dec [mas/a]  [mas]     [km/s]
-    (1,  novas.make_cat_entry ("Alpha Andromedae",  "", 0,   0.139794444,  +29.09044444,   +135.68,    -162.95,      33.62,  -10.6)),
-    (3,  novas.make_cat_entry ("Alpha Phoenicis",   "", 0,   0.438069833,  -42.30598719,   +233.05,    -356.3,       38.5,   +74.6)),
-    (4,  novas.make_cat_entry ("Alpha Cassiopeiae", "", 0,   0.675122527,  +56.53733111,   +50.88,     -32.13,       14.29,  -4.31)),
-    (5,  novas.make_cat_entry ("Beta Ceti",         "", 0,   0.726491916,  -17.98660631,   +232.55,    +31.99,       33.86,  +12.9)),
-    (8,  novas.make_cat_entry ("Alpha Eridani",     "", 0,   1.628568189,  -57.23675281,   +87.00,     -38.24,       23.39,  +16.0)),
-    (11, novas.make_cat_entry ("Alpha Arietis",     "", 0,   2.119557139,  +23.46241756,   +188.55,    -148.08,      49.56,  +14.2))
+    #                                                                                                     motion       motion     parallax radial velocity
+    #                               Name                            Cat  No     Ra[h]        Dec[deg]    Ra[mas/a]   Dec [mas/a]    [mas]    [km/s]
+    (1,  novas.make_cat_entry ("Alpha Andromedae (Alpheratz)    ", "", 0,   0.139794444,  +29.09044444,   +135.68,    -162.95,      33.62,  -10.6)),
+    (3,  novas.make_cat_entry ("Alpha Phoenicis                 ", "", 0,   0.438069833,  -42.30598719,   +233.05,    -356.3,       38.5,   +74.6)),
+    (4,  novas.make_cat_entry ("Alpha Cassiopeiae (Schedir)     ", "", 0,   0.675122527,  +56.53733111,   +50.88,     -32.13,       14.29,  -4.31)),
+    (5,  novas.make_cat_entry ("Beta Ceti (Deneb Kaitos)        ", "", 0,   0.726491916,  -17.98660631,   +232.55,    +31.99,       33.86,  +12.9)),
+    (8,  novas.make_cat_entry ("Alpha Eridani (Achernar)        ", "", 0,   1.628568189,  -57.23675281,   +87.00,     -38.24,       23.39,  +16.0)),
+    (11, novas.make_cat_entry ("Alpha Arietis (Hamal)           ", "", 0,   2.119557139,  +23.46241756,   +188.55,    -148.08,      49.56,  +14.2)),
+    (12, novas.make_cat_entry ("Alpha Ceti (Menkar)             ", "", 0,   3.037991667,  +4.08975,       -10.41,     -76.85,       13.09,  -26.08)),
+    (14, novas.make_cat_entry ("Alpha Persei (Mirfak)           ", "", 0,   3.405380556,  +49.86119444,   +23.75,     -26.23,       6.44,   -2.0)),
+    (16, novas.make_cat_entry ("Alpha Tauri (Aldebaran)         ", "", 0,   4.598677778,  +16.50930556,   +63.45,     -188.94,      48.94,  +54.2)),
+    (17, novas.make_cat_entry ("Beta Orionis (Rigel)            ", "", 0,   5.242305556,  -8.203611111,   +1.87,      -0.56,        3.2352, +25.0)),
+    (18, novas.make_cat_entry ("Alpha Aurigae (Capella)         ", "", 0,   5.278152778,  +45.998,        +75.52,     -427.11,      76.2,   +29.9)),
+    (19, novas.make_cat_entry ("Gamma Orionis (Bellatrix)       ", "", 0,   5.41885,      +6.349694444,   -8.11,      -12.88,       12.92,  +18.2)),
+    (24, novas.make_cat_entry ("Alpha Orionis (Beteigeuze)      ", "", 0,   5.919530556,  +7.407055556,   +27.54,     +11.30,       5.95,   +21.9)),
+    (27, novas.make_cat_entry ("Alpha Carinae (Canopus)         ", "", 0,   6.399197222,  -52.69566667,   +19.93,     +23.24,       10.55,  +20.3)),
+    (29, novas.make_cat_entry ("Alpha Canis Majoris (Sirius)    ", "", 0,   6.752472222,  -16.71611667,   -546.01,    -1223.07,     379.21, -5.50)),
+    (30, novas.make_cat_entry ("Epsilon Canis Majoris (Adhara)  ", "", 0,   6.977111111,  -28.97194444,   +2.63,      +2.29,        7.57,   +27.3))
 ]
 
 
