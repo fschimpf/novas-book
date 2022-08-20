@@ -31,8 +31,8 @@ months = ['','Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'Augu
 # Entries for catalog and catalog number are therefore left empty.
 # tuple for stars: (no_in_Nautisches_Jahrbuch, novas-entry)
 stars = [
-    #                                                                                      motion       motion     prallax radial velocity
-    #                             Name            Cat  No       Ra[h]        delta[deg]   Ra[mas/a]   Dec [mas/a] [mas]      [km/s]
+    #                                                                                      motion       motion     parallax radial velocity
+    #                             Name            Cat  No       Ra[h]        delta[deg]   Ra[mas/a]   Dec [mas/a]  [mas]     [km/s]
     (1,  novas.make_cat_entry ("Alpha Andromedae",  "", 0,   0.139794411,  -29.09043111,   +135.68,    -162.95,      33.62,  -10.6)),
     (3,  novas.make_cat_entry ("Alpha Phoenicis",   "", 0,   0.438069833,  -42.30598719,   +233.05,    -356.3,       38.5,   +74.6)),
     (4,  novas.make_cat_entry ("Alpha Cassiopeiae", "", 0,   0.675122527,  +56.53733111,   +50.88,     -32.13,       14.29,  -4.31)),
@@ -329,9 +329,9 @@ def calculate_ephemerides_day (year, month, day):
 # Open ephemerides database
 jd_start, jd_end, number = eph_manager.ephem_open()
 
-year = 2021
-startdate = date(year, 5, 1)
-enddate = date(year, 6, 30)
+year = 2022
+startdate = date(year, 1, 1)
+enddate = date(year, 12, 31)
 
 # Open Jinja-template-files for generating LaTex-document
 document_template = jinja.get_template('NJ_mainDocument.jinja.tex')
