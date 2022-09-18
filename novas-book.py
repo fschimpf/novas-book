@@ -31,7 +31,7 @@ months = ['','Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'Augu
 # is that coordinats are referenced for Epoch J2000 and Equinox J2000.0 (ICRS). 
 # Entries for catalog and catalog number are left empty.
 # tuple for stars: (no_in_Nautisches_Jahrbuch, novas-entry)
-stars = [
+stars_even_page = [
     #                                                                                                     motion       motion     parallax radial velocity
     #                               Name                            Cat  No     Ra[h]        Dec[deg]    Ra[mas/a]   Dec [mas/a]    [mas]    [km/s]
     (1,  novas.make_cat_entry ("Alpha Andromedae (Alpheratz)    ", "", 0,   0.139794444,  +29.09044444,   +135.68,    -162.95,      33.62,  -10.6)),
@@ -58,7 +58,12 @@ stars = [
     (38, novas.make_cat_entry ("Alpha Hydrae (Alphard)          ", "", 0,   9.459788889,  -8.658611111,   -15.23,     +34.37,       18.09,  -4.7)),
     (39, novas.make_cat_entry ("Alpha Leonis (Regulus)          ", "", 0,   10.13953056,  +11.96722222,   -248.73,    +5.59,        41.13,  +5.9)),
     (41, novas.make_cat_entry ("Alpha Ursae majoris (Dubhe)     ", "", 0,   11.06213889,  +61.75111111,   -134.11,    -34.70,       26.54,  -9.4)),
-    (42, novas.make_cat_entry ("Beta Leonis (Denebola)          ", "", 0,   11.81766111,  +14.57205556,   -497.68,    -114.76,      90.91,  -0.2)),
+    (42, novas.make_cat_entry ("Beta Leonis (Denebola)          ", "", 0,   11.81766111,  +14.57205556,   -497.68,    -114.76,      90.91,  -0.2))
+]
+
+stars_odd_page = [
+    #                                                                                                     motion       motion     parallax radial velocity
+    #                               Name                            Cat  No     Ra[h]        Dec[deg]    Ra[mas/a]   Dec [mas/a]    [mas]    [km/s]
     (43, novas.make_cat_entry ("Alpha Crucis (Acrux)            ", "", 0,   12.44330556,  -63.09908333,   -35.83,     -14.86,       10.17,  -11.2)),
     (44, novas.make_cat_entry ("Gamma Crucis (Gacrux)           ", "", 0,   12.51943333,  -57.11321333,   +28.23,     -265.08,      36.83,  +20.6)),
     (46, novas.make_cat_entry ("Epsilon Ursae majoris (Alioth)  ", "", 0,   12.90048611,  +55.95983333,   +111.91,    -8.24,        39.51,  -12.7)),
@@ -266,18 +271,16 @@ def horizontal_parallaxe (distance):      # calculates horizontal parallaxe for 
     hp_minutes = decimal2m(hp)              # expected result is smaller than 1 degree, take only minutes part.
     return hp_minutes
 
-def calculate_ephemerides_day (year, month, day):
+def calculate_star_positions (jd_tt, stars):      # calculates apparent positions of all 25 stars for one page for the given julian data. 
+    star_positions = []
+    for n_star in range(len(stars)):
+        star_no, star = stars[n_star]
+        ra, dec = novas.app_star(jd_tt, star) 
+        sha = 360.0 - (ra * 360.0 / 24.0)  # Calculate sidereal hour angle (SHA) from right ascension and convert from hours to degrees.
+        star_positions.append((star_no, decimal2dm_360(sha), decimal2dm_NS(dec)))
+    return star_positions
 
-    # Get number of leapseconds between TAI and UTC. This is used for calculating
-    # TT from UT1. TT = leapseconds + 32.184s + UT1. http://www.stjarnhimlen.se/comp/time.html
-    leapseconds = dTAI_UTC_from_utc(datetime(year, month, day)).seconds
-    delta_TT_UT1 = (32.184 + leapseconds) / 3600.0  # time difference in hours
-
-    # Calculate Julian Date for stars. The star-data changes slowly and is always used for two day in the final tables. 
-    # Therefore the time is chosen to be in the middle of such a 2-day-period.
-    # DIRTY: Just added 23.5 h the Gregorian date.
-    # FIX: Do something with the second double-page. 
-    jd_tt_stars = novas.julian_date(year, month, day, delta_TT_UT1 + 23.5)
+def calculate_ephemerides_day (year, month, day, delta_TT_UT1):
 
     planets = []
     for time_ut1 in range(24): # iterate over 24h of UT1 (=lines in final table for one day)
@@ -329,13 +332,13 @@ def calculate_ephemerides_day (year, month, day):
                 planet_results_per_UT1[planet_name] = (decimal2dm_360(grt), decimal2dm_NS(dec))
 
         # calculate position of star
-        if time_ut1 < len(stars):
-            star_no, star = stars[time_ut1]
-            ra, dec = novas.app_star(jd_tt_stars, star) # FIX: Use fixed time in middle of 2-day-period instead. Star positions are valid for 2 days.
-            sha = 360.0 - (ra * 360.0 / 24.0)  # Calculate sidereal hour angle (SHA) from right ascension and convert from hours to degrees.
-            planet_results_per_UT1['stars'] = (star_no, decimal2dm_360(sha), decimal2dm_NS(dec))
-        else:
-            planet_results_per_UT1['stars'] = ('*', ('*', '*'), ('*', '*'))
+        #if time_ut1 < len(stars):
+        #    star_no, star = stars[time_ut1]
+        #    ra, dec = novas.app_star(jd_tt_stars, star) # FIX: Use fixed time in middle of 2-day-period instead. Star positions are valid for 2 days.
+        #    sha = 360.0 - (ra * 360.0 / 24.0)  # Calculate sidereal hour angle (SHA) from right ascension and convert from hours to degrees.
+        #    planet_results_per_UT1['stars'] = (star_no, decimal2dm_360(sha), decimal2dm_NS(dec))
+        #else:
+        #    planet_results_per_UT1['stars'] = ('*', ('*', '*'), ('*', '*'))
         
         planets.append(planet_results_per_UT1)
 
@@ -408,12 +411,29 @@ for dt in rrule(DAILY, dtstart=startdate, until=enddate):
     additional_data = {'dayOfYear': time_tuple[7]}
     print ('calculating page for {}, {}.{}.{}'.format(weekday, day, month, year))
 
+    # Get number of leapseconds between TAI and UTC. This is used for calculating
+    # TT from UT1. TT = leapseconds + 32.184s + UT1. http://www.stjarnhimlen.se/comp/time.html
+    leapseconds = dTAI_UTC_from_utc(datetime(year, month, day)).seconds
+    delta_TT_UT1 = (32.184 + leapseconds) / 3600.0  # time difference in hours
+
     # Calculate ephemerides for the selected day
-    planets, transits = calculate_ephemerides_day (year, month, day)
+    planets, transits = calculate_ephemerides_day (year, month, day, delta_TT_UT1)
+
+    # Calculate ephemerides for stars in a two-day-period
+    # Calculate Julian Date for stars. The star-data changes slowly and is always used for two day in the final tables. 
+    # Therefore the time is chosen to be in the middle of such a 2-day-period.
+    # DIRTY: Just added 23.5 h the Gregorian date. (delta_TT <= 24.0 h)
+    if page_is_even == 1:
+        jd_tt_stars = novas.julian_date(year, month, day, delta_TT_UT1 + 23.5)
+        star_positions = calculate_star_positions (jd_tt_stars, stars_even_page)
+    else:
+        jd_tt_stars = novas.julian_date(year, month, day, delta_TT_UT1)    
+        star_positions = calculate_star_positions (jd_tt_stars, stars_odd_page)
 
     #render day's results into (long) string
-    table = table + table_eph_day_template.render(year=year, month=months[month], day=day, dayofweek=weekday, d=planets, page_is_even=page_is_even, ut1=ut1, add=additional_data, transits=transits)
+    table = table + table_eph_day_template.render(year=year, month=months[month], day=day, dayofweek=weekday, d=planets, page_is_even=page_is_even, ut1=ut1, add=additional_data, transits=transits, s=star_positions)
 
+    # update page odd/even for next page
     if page_is_even == 1:
         page_is_even = 0
     else:
