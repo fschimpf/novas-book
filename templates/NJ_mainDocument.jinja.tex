@@ -5,6 +5,8 @@
 \usepackage{amsmath}
 \usepackage{colortbl}
 \usepackage{fancyhdr}
+\usepackage{hyperref}
+
 \definecolor{gray}{RGB}{213,229,255}
 
 \title{Ephemeriden für das Jahr (((year)))}
@@ -20,10 +22,10 @@
 \sffamily
 \maketitle
 \section{Willkommen}
-Als ich mich im Jahr 2021 zum ersten Mal intensiver mit der Astronaviation befasste, fiel mir auf, dass das deutsche Nautische Jahrbuch, herausgegeben vom BSH (Bundesamt für Seeschiffahrt und Hydrografie) nicht mehr herausgegeben wird. Da ich trotzdem gerne ohne zusätzliche Programme, Apps. o.ä. auskommen wollte, habe ich mich nach Möglichkeiten umgesehen, selbst die notwendigen Daten zu berechnen. Das Ergebnis sollte dem Nautischen Jahrbuch möglichst ähnlich sein, damit die geübten Methoden weiterhin funktionieren und sich keine neuen Fehlerquellen einschleichen können.
+Als ich mich im Jahr 2021 zum ersten Mal intensiver mit der Astronaviation befasste, fiel mir auf, dass das deutsche nautische Jahrbuch, herausgegeben vom BSH (Bundesamt für Seeschiffahrt und Hydrografie) nicht mehr herausgegeben wird. Da ich trotzdem gerne ohne zusätzliche Programme, Apps. o.ä. auskommen wollte, habe ich mich nach Möglichkeiten umgesehen, selbst die notwendigen Daten zu berechnen. Das Ergebnis sollte dem Nautischen Jahrbuch möglichst ähnlich sein, damit die geübten Methoden weiterhin funktionieren und sich keine neuen Fehlerquellen einschleichen können.
 
 \vspace{1cm}
-In der aktuellen Version fehlt noch viel, um das selbstgenerierte Nautische Jahrbuch komplett zu machen (siehe nächste Seite). Trotzdem hoffe ich, dass es Segler gibt, die es nützlich finden. Ich würde mich über Rückmeldungen freuen.
+In der aktuellen Version fehlt noch viel, um das selbstgenerierte nautische Jahrbuch komplett zu machen (siehe nächste Seite). Trotzdem hoffe ich, dass es Segler gibt, die es nützlich finden. Ich würde mich über Rückmeldungen (und Hinweise auf falsche oder verdächtige Werte) freuen.
 
 \vspace{1cm}
 \begin{center}
@@ -38,7 +40,7 @@ Sommer 2022, Fritz Schimpf, fritz@schimpf-ing.no
 
 
 \section{Technische Details}
-Die Berechnung erfolgt mit der Bibliothek Novas vom United States Naval Observatory. Mein Programm, das eigentlich nur die Novas-Routines mit den enstprechenden Eigabedaten aufruft, ist in Python geschrieben und generiert mit Hilfe der templating-engine Jinja ein \LaTeX\ -Dokument, das mit pdf-latex zu einem PDF gerendert wird.
+Die Berechnung erfolgt mit der Bibliothek Novas vom United States Naval Observatory. Mein Programm ruft die Novas-Routinen mit den enstprechenden Eigabedaten auf. Es ist in Python geschrieben und generiert mit Hilfe der templating-engine Jinja ein \LaTeX\ -Dokument, das mit pdf-latex zu einem PDF gerendert wird.
 
 \newpage
 
@@ -49,7 +51,16 @@ Die Berechnung erfolgt mit der Bibliothek Novas vom United States Naval Observat
 \item Alter des Mondes fehlt.
 \item Schalttafeln fehlen. Man kann die Schalttafeln aus einer beliebigen Ausgabe des NJ verwenden, da diese nicht jahresabhängig sind.
 \item Übersicht über die Sterne fehlt noch. Die Nummerierung ist wie im NJ.
+\item Beschickungstabellen fehlen.
 \end{itemize}
+
+Das Programm ist weiterhin in Arbeit und ich hoffe, die fehlenden Teile bald einbauen zu können.
+
+Die neueste Version von Programm und Jahrbüchern liegt hier: 
+\href{url}{https://github.com/fschimpf/novas-book}
+
+\section{Genauigkeit}
+Ich habe manuell einige Tage mit alten nautischen Jahrbüchern verglichen und keine größeren Abweichungen als 0,1 Minute feststellen können. Ich übernehme natürlich keine Garantie für die Richtigkeit der Werte. 
 
 \newpage
 

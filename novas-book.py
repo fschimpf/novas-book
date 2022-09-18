@@ -157,11 +157,16 @@ def decimal2hm (decimal_angle):
     
     # calculate minutes from fraction part
     min = round(abs(decimal_angle) % 1. * 60, 0)
-    min = '{:02.0F}'.format(min)
-    
+     
     # convert decimal part to string and remove fraction part. (Important not to round, minutes are separeted!)
     deg = int(abs(decimal_angle))
+
+    if min == 60:       # Fix for problem: Due to rounding in minutes, sometimes times like 11:60 occured. 
+        deg = deg + 1
+        min = 0
+
     deg = '{:02.0F}'.format(deg)
+    min = '{:02.0F}'.format(min)
     
     return (deg, min)
 
