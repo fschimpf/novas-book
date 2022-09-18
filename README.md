@@ -3,6 +3,6 @@ Generates Ephemerides for celestial navigation using the library [python-novas](
 
 Generiert Ephemeriden für Astronavigation im Stil des nicht mehr verfügbaren Nautschen Jahrbuchs des BSH. Die Berechung basiert auf der Bibliothek [python-novas](https://github.com/brandon-rhodes/python-novas) des United States Naval Observatory.
 
-Fertige PDFs mit dem "Nautischen Jahrbuch" liegen im Ordner 'output'.
+Fertige PDFs mit dem "Nautischen Jahrbuch" liegen unter 'Releases'.
 
 
